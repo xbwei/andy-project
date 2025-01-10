@@ -94,6 +94,7 @@
             <button id="shoot">Shoot</button>
         </div>
     </div>
+    <button onclick="startGame()">Start Game</button>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
@@ -200,19 +201,9 @@
         }
 
         function stopGame(message) {
-            alert(message);
-            resetGame();
-            setTimeout(() => startGame(), 2000); // Auto-restart after 2 seconds
-        }
-
-        function resetGame() {
             isGameRunning = false;
-            stickman.x = 50;
-            stickman.y = 300;
-            stickman.bullets = [];
-            badGuy.x = 500;
-            badGuy.y = 300;
-            badGuy.bullets = [];
+            alert(message);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
 
         function gameLoop() {
@@ -235,8 +226,14 @@
         }
 
         function startGame() {
-            if (isGameRunning) return; // Prevent duplicate starts
+            if (isGameRunning) return;
             isGameRunning = true;
+            stickman.x = 50;
+            stickman.y = 300;
+            stickman.bullets = [];
+            badGuy.x = 500;
+            badGuy.y = 300;
+            badGuy.bullets = [];
             gameLoop();
         }
 
