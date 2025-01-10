@@ -200,9 +200,19 @@
         }
 
         function stopGame(message) {
-            isGameRunning = false;
             alert(message);
+            resetGame();
             setTimeout(() => startGame(), 2000); // Auto-restart after 2 seconds
+        }
+
+        function resetGame() {
+            isGameRunning = false;
+            stickman.x = 50;
+            stickman.y = 300;
+            stickman.bullets = [];
+            badGuy.x = 500;
+            badGuy.y = 300;
+            badGuy.bullets = [];
         }
 
         function gameLoop() {
@@ -225,13 +235,8 @@
         }
 
         function startGame() {
+            if (isGameRunning) return; // Prevent duplicate starts
             isGameRunning = true;
-            stickman.x = 50;
-            stickman.y = 300;
-            stickman.bullets = [];
-            badGuy.x = 500;
-            badGuy.y = 300;
-            badGuy.bullets = [];
             gameLoop();
         }
 
