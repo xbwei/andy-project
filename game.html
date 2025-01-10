@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stickman Fight</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        canvas {
+            border: 2px solid #000;
+            display: block;
+            margin: 20px auto;
+            background-color: #ddd;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px;
+        }
+        .move-controls {
+            display: grid;
+            grid-template-rows: repeat(3, 50px);
+            grid-template-columns: repeat(3, 50px);
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+        }
+        .move-controls button {
+            width: 50px;
+            height: 50px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .move-controls button:nth-child(1),
+        .move-controls button:nth-child(3),
+        .move-controls button:nth-child(7),
+        .move-controls button:nth-child(9) {
+            visibility: hidden;
+        }
+        .shoot-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .shoot-controls button {
+            padding: 15px 30px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Stickman Fight</h1>
+    <p>Control the stickman and defeat the bad guy with a tank!</p>
+    <canvas id="gameCanvas" width="600" height="400"></canvas>
+    <div class="controls">
+        <div class="move-controls">
+            <button></button>
+            <button id="moveUp">▲</button>
+            <button></button>
+            <button id="moveLeft">◄</button>
+            <button></button>
+            <button id="moveRight">►</button>
+            <button></button>
+            <button id="moveDown">▼</button>
+            <button></button>
+        </div>
+        <div class="shoot-controls">
+            <button id="shoot">Shoot</button>
+        </div>
+    </div>
+    <button onclick="startGame()">Start Game</button>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let isGameRunning = false;
+
+        const stickman = {
+            x: 50,
+            y: 300,
+            width: 20,
+            height: 50,
+            color: 'blue',
+            speed: 5,
+            bullets: [],
+        };
+
+        const badGuy = {
+            x: 500,
+            y: 300,
+            width: 40, // Tank is wider
+            height: 60, // Tank is taller
+            color: 'red',
+            speed: 4, // Increased speed
+            bullets: [],
+            direction: 'left',
+        };
+
+        function drawStickman() {
+            ctx.fillStyle = stickman.color;
+            ctx.fillRect(stickman.x, stickman.y, stickman.width, stickman.height);
+        }
+
+        function drawBadGuy() {
+            ctx.fillStyle = badGuy.color;
+            ctx.fillRect(badGuy.x, badGuy.y, badGuy.width, badGuy.height);
+        }
+
+        function moveBadGuy() {
+            if (badGuy.direction === 'left') {
+                badGuy.x -= badGuy.speed;
+                if (badGuy.x <= 0) badGuy.direction = 'right';
+            } else {
+                badGuy.x += badGuy.speed;
+                if (badGuy.x + badGuy.width >= canvas.width) badGuy.direction = 'left';
+            }
+
+            const randomMove = Math.random();
+            if (randomMove < 0.25 && badGuy.y > 0) {
+                badGuy.y -= badGuy.speed;
+            } else if (randomMove < 0.5 && badGuy.y + badGuy.height < canvas.height) {
+                badGuy.y += badGuy.speed;
+            }
+        }
+
+        function moveEntity(entity, direction) {
+            if (direction === 'left' && entity.x > 0) {
+                entity.x -= entity.speed;
+            } else if (direction === 'right' && entity.x + entity.width < canvas.width) {
+                entity.x += entity.speed;
+            } else if (direction === 'up' && entity.y > 0) {
+                entity.y -= entity.speed;
+            } else if (direction === 'down' && entity.y + entity.height < canvas.height) {
+                entity.y += entity.speed;
+            }
+        }
+
+        function shootBullet(shooter, target) {
+            const angle = Math.atan2(target.y - shooter.y, target.x - shooter.x);
+            shooter.bullets.push({
+                x: shooter.x + shooter.width / 2,
+                y: shooter.y + shooter.height / 2,
+                width: 10,
+                height: 5,
+                speed: 5,
+                dx: Math.cos(angle) * 5,
+                dy: Math.sin(angle) * 5
+            });
+        }
+
+        function drawBullets(bullets, target, entityType) {
+            bullets.forEach((bullet, index) => {
+                ctx.fillStyle = entityType === 'stickman' ? 'blue' : 'black';
+                ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+                bullet.x += bullet.dx;
+                bullet.y += bullet.dy;
+
+                if (
+                    bullet.x < target.x + target.width &&
+                    bullet.x + bullet.width > target.x &&
+                    bullet.y < target.y + target.height &&
+                    bullet.y + bullet.height > target.y
+                ) {
+                    stopGame(entityType === 'stickman' ? 'You defeated the bad guy!' : 'You got hit! Game Over.');
+                }
+
+                if (
+                    bullet.x < 0 || bullet.x > canvas.width ||
+                    bullet.y < 0 || bullet.y > canvas.height
+                ) {
+                    bullets.splice(index, 1);
+                }
+            });
+        }
+
+        function stopGame(message) {
+            isGameRunning = false;
+            alert(message);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function gameLoop() {
+            if (!isGameRunning) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            drawStickman();
+            drawBadGuy();
+            moveBadGuy();
+
+            drawBullets(stickman.bullets, badGuy, 'stickman');
+            drawBullets(badGuy.bullets, stickman, 'badGuy');
+
+            if (Math.random() < 0.02) {
+                shootBullet(badGuy, stickman);
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function startGame() {
+            if (isGameRunning) return;
+            isGameRunning = true;
+            stickman.x = 50;
+            stickman.y = 300;
+            stickman.bullets = [];
+            badGuy.x = 500;
+            badGuy.y = 300;
+            badGuy.bullets = [];
+            gameLoop();
+        }
+
+        document.getElementById('moveLeft').addEventListener('click', () => moveEntity(stickman, 'left'));
+        document.getElementById('moveRight').addEventListener('click', () => moveEntity(stickman, 'right'));
+        document.getElementById('moveUp').addEventListener('click', () => moveEntity(stickman, 'up'));
+        document.getElementById('moveDown').addEventListener('click', () => moveEntity(stickman, 'down'));
+        document.getElementById('shoot').addEventListener('click', () => shootBullet(stickman, badGuy));
+    </script>
+</body>
+</html>
