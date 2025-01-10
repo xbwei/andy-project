@@ -21,6 +21,10 @@
             max-width: 600px;
             height: auto;
         }
+        .status {
+            font-size: 18px;
+            margin: 10px 0;
+        }
         .controls {
             display: flex;
             flex-direction: column;
@@ -78,7 +82,11 @@
 </head>
 <body>
     <h1>Stickman Fight</h1>
-    <p>Control the stickman and defeat the bad guy with a tank!</p>
+    <div class="status">
+        <span id="statusMessage">Press Start to Play!</span>
+        <br>
+        <span id="score">Score: 0</span>
+    </div>
     <canvas id="gameCanvas" width="600" height="400"></canvas>
     <div class="controls">
         <button id="startGame">Start Game</button>
@@ -101,8 +109,11 @@
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
+        const statusMessage = document.getElementById('statusMessage');
+        const scoreDisplay = document.getElementById('score');
 
         let isGameRunning = false;
+        let score = 0;
 
         const stickman = {
             x: 50,
@@ -190,7 +201,16 @@
                     bullet.y < target.y + target.height &&
                     bullet.y + bullet.height > target.y
                 ) {
-                    stopGame(entityType === 'stickman' ? 'You defeated the bad guy!' : 'You got hit! Game Over.');
+                    if (entityType === 'stickman') {
+                        score += 10;
+                        updateScore();
+                        resetGame();
+                        startGame();
+                    } else {
+                        updateStatus('You got hit! Game Over.');
+                        resetGame();
+                        setTimeout(startGame, 2000);
+                    }
                 }
 
                 if (
@@ -202,10 +222,12 @@
             });
         }
 
-        function stopGame(message) {
-            alert(message);
-            resetGame();
-            setTimeout(() => startGame(), 2000); // Auto-restart after 2 seconds
+        function updateStatus(message) {
+            statusMessage.textContent = message;
+        }
+
+        function updateScore() {
+            scoreDisplay.textContent = `Score: ${score}`;
         }
 
         function resetGame() {
@@ -241,6 +263,7 @@
             if (isGameRunning) return; // Prevent duplicate starts
             document.getElementById('startGame').style.display = 'none';
             isGameRunning = true;
+            updateStatus('Game in progress...');
             gameLoop();
         }
 
