@@ -94,7 +94,6 @@
             <button id="shoot">Shoot</button>
         </div>
     </div>
-    <button onclick="startGame()">Start Game</button>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
@@ -203,7 +202,7 @@
         function stopGame(message) {
             isGameRunning = false;
             alert(message);
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            setTimeout(() => startGame(), 2000); // Auto-restart after 2 seconds
         }
 
         function gameLoop() {
@@ -226,7 +225,6 @@
         }
 
         function startGame() {
-            if (isGameRunning) return;
             isGameRunning = true;
             stickman.x = 50;
             stickman.y = 300;
