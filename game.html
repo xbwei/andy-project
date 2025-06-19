@@ -164,27 +164,18 @@
       if (shooter === stickman && now - lastShotTime < 500 - fireRateLevel * 75) return;
       lastShotTime = now;
       const angle = Math.atan2(target.y - shooter.y, target.x - shooter.x);
-      const bullet = {
+      shooter.bullets.push({
         x: shooter.x + shooter.width / 2,
         y: shooter.y + shooter.height / 2,
         width: 8 + bulletSizeLevel * 2,
         height: 5 + bulletSizeLevel,
         dx: Math.cos(angle) * 5,
-        dy: Math.sin(angle) * 5,
-        drawLine: shooter === stickman
-      };
-      shooter.bullets.push(bullet);
+        dy: Math.sin(angle) * 5
+      });
     }
 
     function drawBullets(bullets, target, shooterType) {
       bullets.forEach((b, i) => {
-        if (b.drawLine) {
-          ctx.strokeStyle = 'rgba(0,0,255,0.3)';
-          ctx.beginPath();
-          ctx.moveTo(stickman.x + stickman.width / 2, stickman.y + stickman.height / 2);
-          ctx.lineTo(b.x, b.y);
-          ctx.stroke();
-        }
         ctx.fillStyle = shooterType === 'stickman' ? 'blue' : 'black';
         ctx.fillRect(b.x, b.y, b.width, b.height);
         b.x += b.dx;
