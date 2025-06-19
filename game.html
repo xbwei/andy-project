@@ -25,12 +25,12 @@
             font-size: 18px;
             margin: 10px 0;
         }
-        .controls {
+        .controls, .upgrades {
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            margin: 20px;
+            margin: 10px;
         }
         .move-controls {
             display: grid;
@@ -38,40 +38,27 @@
             grid-template-columns: repeat(3, 60px);
             gap: 10px;
         }
-        .move-controls button {
+        .move-controls button, .shoot-controls button, .upgrades button {
             width: 60px;
             height: 60px;
-            font-size: 18px;
+            font-size: 14px;
             cursor: pointer;
             border-radius: 10px;
             touch-action: manipulation;
-        }
-        .move-controls button:nth-child(1),
-        .move-controls button:nth-child(3),
-        .move-controls button:nth-child(7),
-        .move-controls button:nth-child(9) {
-            visibility: hidden;
-        }
-        .shoot-controls {
-            margin-top: 20px;
+            margin: 5px;
         }
         .shoot-controls button {
             padding: 20px 40px;
-            font-size: 18px;
-            cursor: pointer;
-            border-radius: 10px;
-            touch-action: manipulation;
         }
-
         @media (max-width: 480px) {
             .move-controls {
                 grid-template-rows: repeat(3, 50px);
                 grid-template-columns: repeat(3, 50px);
             }
-            .move-controls button {
+            .move-controls button, .upgrades button {
                 width: 50px;
                 height: 50px;
-                font-size: 16px;
+                font-size: 12px;
             }
             .shoot-controls button {
                 padding: 15px 30px;
@@ -83,9 +70,9 @@
 <body>
     <h1>Stickman Fight</h1>
     <div class="status">
-        <span id="statusMessage">Press Start to Play!</span>
-        <br>
-        <span id="score">Score: 0</span>
+        <span id="statusMessage">Press Start to Play!</span><br>
+        <span id="score">Score: 0</span><br>
+        <span id="money">Money: $0</span>
     </div>
     <canvas id="gameCanvas" width="600" height="400"></canvas>
     <div class="controls">
@@ -105,15 +92,23 @@
             <button id="shoot">Shoot</button>
         </div>
     </div>
-
+    <div class="upgrades">
+        <button id="upgradeSize">Upgrade Bullet Size</button>
+        <button id="upgradeRate">Upgrade Fire Rate</button>
+    </div>
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const statusMessage = document.getElementById('statusMessage');
         const scoreDisplay = document.getElementById('score');
+        const moneyDisplay = document.getElementById('money');
 
         let isGameRunning = false;
         let score = 0;
+        let money = 0;
+        let bulletSizeLevel = 1;
+        let fireRateLevel = 1;
+        let lastShotTime = 0;
 
         const stickman = {
             x: 50,
@@ -128,10 +123,10 @@
         const badGuy = {
             x: 500,
             y: 300,
-            width: 40, // Tank is wider
-            height: 60, // Tank is taller
+            width: 40,
+            height: 60,
             color: 'red',
-            speed: 2, // Reduced speed
+            speed: 1.2,
             bullets: [],
             direction: 'left',
         };
@@ -147,63 +142,48 @@
         }
 
         function moveBadGuy() {
-            if (badGuy.direction === 'left') {
-                badGuy.x -= badGuy.speed;
-                if (badGuy.x <= 0) badGuy.direction = 'right';
-            } else {
-                badGuy.x += badGuy.speed;
-                if (badGuy.x + badGuy.width >= canvas.width) badGuy.direction = 'left';
+            badGuy.x += badGuy.direction === 'left' ? -badGuy.speed : badGuy.speed;
+            if (badGuy.x <= 0 || badGuy.x + badGuy.width >= canvas.width) {
+                badGuy.direction = badGuy.direction === 'left' ? 'right' : 'left';
             }
-
-            const randomMove = Math.random();
-            if (randomMove < 0.25 && badGuy.y > 0) {
-                badGuy.y -= badGuy.speed;
-            } else if (randomMove < 0.5 && badGuy.y + badGuy.height < canvas.height) {
-                badGuy.y += badGuy.speed;
-            }
+            const r = Math.random();
+            if (r < 0.25 && badGuy.y > 0) badGuy.y -= badGuy.speed;
+            else if (r < 0.5 && badGuy.y + badGuy.height < canvas.height) badGuy.y += badGuy.speed;
         }
 
-        function moveEntity(entity, direction) {
-            if (direction === 'left' && entity.x > 0) {
-                entity.x -= entity.speed;
-            } else if (direction === 'right' && entity.x + entity.width < canvas.width) {
-                entity.x += entity.speed;
-            } else if (direction === 'up' && entity.y > 0) {
-                entity.y -= entity.speed;
-            } else if (direction === 'down' && entity.y + entity.height < canvas.height) {
-                entity.y += entity.speed;
-            }
+        function moveEntity(entity, dir) {
+            if (dir === 'left' && entity.x > 0) entity.x -= entity.speed;
+            if (dir === 'right' && entity.x + entity.width < canvas.width) entity.x += entity.speed;
+            if (dir === 'up' && entity.y > 0) entity.y -= entity.speed;
+            if (dir === 'down' && entity.y + entity.height < canvas.height) entity.y += entity.speed;
         }
 
         function shootBullet(shooter, target) {
+            const now = Date.now();
+            if (shooter === stickman && now - lastShotTime < 500 - fireRateLevel * 75) return;
+            lastShotTime = now;
             const angle = Math.atan2(target.y - shooter.y, target.x - shooter.x);
             shooter.bullets.push({
                 x: shooter.x + shooter.width / 2,
                 y: shooter.y + shooter.height / 2,
-                width: 10,
-                height: 5,
-                speed: 5,
+                width: 8 + bulletSizeLevel * 2,
+                height: 5 + bulletSizeLevel,
                 dx: Math.cos(angle) * 5,
                 dy: Math.sin(angle) * 5
             });
         }
 
-        function drawBullets(bullets, target, entityType) {
-            bullets.forEach((bullet, index) => {
-                ctx.fillStyle = entityType === 'stickman' ? 'blue' : 'black';
-                ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
-                bullet.x += bullet.dx;
-                bullet.y += bullet.dy;
-
-                if (
-                    bullet.x < target.x + target.width &&
-                    bullet.x + bullet.width > target.x &&
-                    bullet.y < target.y + target.height &&
-                    bullet.y + bullet.height > target.y
-                ) {
-                    if (entityType === 'stickman') {
+        function drawBullets(bullets, target, shooterType) {
+            bullets.forEach((b, i) => {
+                ctx.fillStyle = shooterType === 'stickman' ? 'blue' : 'black';
+                ctx.fillRect(b.x, b.y, b.width, b.height);
+                b.x += b.dx;
+                b.y += b.dy;
+                if (b.x < target.x + target.width && b.x + b.width > target.x && b.y < target.y + target.height && b.y + b.height > target.y) {
+                    if (shooterType === 'stickman') {
                         score += 10;
-                        updateScore();
+                        money += 10;
+                        updateUI();
                         resetGame();
                         startGame();
                     } else {
@@ -212,22 +192,17 @@
                         setTimeout(startGame, 2000);
                     }
                 }
-
-                if (
-                    bullet.x < 0 || bullet.x > canvas.width ||
-                    bullet.y < 0 || bullet.y > canvas.height
-                ) {
-                    bullets.splice(index, 1);
-                }
+                if (b.x < 0 || b.x > canvas.width || b.y < 0 || b.y > canvas.height) bullets.splice(i, 1);
             });
         }
 
-        function updateStatus(message) {
-            statusMessage.textContent = message;
+        function updateUI() {
+            scoreDisplay.textContent = `Score: ${score}`;
+            moneyDisplay.textContent = `Money: $${money}`;
         }
 
-        function updateScore() {
-            scoreDisplay.textContent = `Score: ${score}`;
+        function updateStatus(msg) {
+            statusMessage.textContent = msg;
         }
 
         function resetGame() {
@@ -242,25 +217,18 @@
 
         function gameLoop() {
             if (!isGameRunning) return;
-
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
             drawStickman();
             drawBadGuy();
             moveBadGuy();
-
             drawBullets(stickman.bullets, badGuy, 'stickman');
             drawBullets(badGuy.bullets, stickman, 'badGuy');
-
-            if (Math.random() < 0.02) {
-                shootBullet(badGuy, stickman);
-            }
-
+            if (Math.random() < 0.02) shootBullet(badGuy, stickman);
             requestAnimationFrame(gameLoop);
         }
 
         function startGame() {
-            if (isGameRunning) return; // Prevent duplicate starts
+            if (isGameRunning) return;
             document.getElementById('startGame').style.display = 'none';
             isGameRunning = true;
             updateStatus('Game in progress...');
@@ -273,6 +241,20 @@
         document.getElementById('moveDown').addEventListener('click', () => moveEntity(stickman, 'down'));
         document.getElementById('shoot').addEventListener('click', () => shootBullet(stickman, badGuy));
         document.getElementById('startGame').addEventListener('click', startGame);
+        document.getElementById('upgradeSize').addEventListener('click', () => {
+            if (money >= 20 && bulletSizeLevel < 5) {
+                bulletSizeLevel++;
+                money -= 20;
+                updateUI();
+            }
+        });
+        document.getElementById('upgradeRate').addEventListener('click', () => {
+            if (money >= 20 && fireRateLevel < 5) {
+                fireRateLevel++;
+                money -= 20;
+                updateUI();
+            }
+        });
     </script>
 </body>
 </html>
