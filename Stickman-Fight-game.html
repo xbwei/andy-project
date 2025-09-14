@@ -7,10 +7,22 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      text-align: center;
       margin: 0;
       padding: 0;
-      background-color: #f4f4f4;
+      background: #f9f9f9;
+      color: #333;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    h1 {
+      color: #2c3e50;
     }
     canvas {
       border: 2px solid #000;
@@ -26,17 +38,15 @@
       margin: 10px 0;
     }
     .controls, .upgrades {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      margin: 10px;
+      margin: 15px 0;
     }
     .move-controls {
       display: grid;
       grid-template-rows: repeat(3, 60px);
       grid-template-columns: repeat(3, 60px);
       gap: 10px;
+      justify-content: center;
+      margin: 10px auto;
     }
     .move-controls button, .shoot-controls button, .upgrades button {
       width: 60px;
@@ -45,57 +55,56 @@
       cursor: pointer;
       border-radius: 10px;
       touch-action: manipulation;
-      margin: 5px;
     }
     .shoot-controls button {
       padding: 20px 40px;
+      margin-top: 10px;
     }
-    @media (max-width: 480px) {
-      .move-controls {
-        grid-template-rows: repeat(3, 50px);
-        grid-template-columns: repeat(3, 50px);
-      }
-      .move-controls button, .upgrades button {
-        width: 50px;
-        height: 50px;
-        font-size: 12px;
-      }
-      .shoot-controls button {
-        padding: 15px 30px;
-        font-size: 16px;
-      }
+    .back {
+      display: block;
+      margin-top: 20px;
+      font-weight: bold;
+      color: #2980b9;
+      text-decoration: none;
+    }
+    .back:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
-  <h1>Stickman Fight</h1>
-  <div class="status">
-    <span id="statusMessage">Press Start to Play!</span><br />
-    <span id="score">Score: 0</span><br />
-    <span id="money">Money: $0</span>
-  </div>
-  <canvas id="gameCanvas" width="600" height="400"></canvas>
-  <div class="controls">
-    <button id="startGame">Start Game</button>
-    <div class="move-controls">
-      <button></button>
-      <button id="moveUp">▲</button>
-      <button></button>
-      <button id="moveLeft">◄</button>
-      <button></button>
-      <button id="moveRight">►</button>
-      <button></button>
-      <button id="moveDown">▼</button>
-      <button></button>
+  <div class="container">
+    <h1>⚔️ Stickman Fight</h1>
+    <div class="status">
+      <span id="statusMessage">Press Start or Space to Play!</span><br />
+      <span id="score">Score: 0</span><br />
+      <span id="money">Money: $0</span>
     </div>
-    <div class="shoot-controls">
-      <button id="shoot">Shoot</button>
+    <canvas id="gameCanvas" width="600" height="400"></canvas>
+    <div class="controls">
+      <button id="startGame">Start Game</button>
+      <div class="move-controls">
+        <button></button>
+        <button id="moveUp">▲</button>
+        <button></button>
+        <button id="moveLeft">◄</button>
+        <button></button>
+        <button id="moveRight">►</button>
+        <button></button>
+        <button id="moveDown">▼</button>
+        <button></button>
+      </div>
+      <div class="shoot-controls">
+        <button id="shoot">Shoot</button>
+      </div>
     </div>
+    <div class="upgrades">
+      <button id="upgradeSize">Upgrade Bullet Size</button>
+      <button id="upgradeRate">Upgrade Fire Rate</button>
+    </div>
+    <a class="back" href="index.html">⬅ Back to homepage</a>
   </div>
-  <div class="upgrades">
-    <button id="upgradeSize">Upgrade Bullet Size</button>
-    <button id="upgradeRate">Upgrade Fire Rate</button>
-  </div>
+
   <script>
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
@@ -242,6 +251,7 @@
       gameLoop();
     }
 
+    // Button controls
     document.getElementById('moveLeft').addEventListener('click', () => moveEntity(stickman, 'left'));
     document.getElementById('moveRight').addEventListener('click', () => moveEntity(stickman, 'right'));
     document.getElementById('moveUp').addEventListener('click', () => moveEntity(stickman, 'up'));
@@ -254,6 +264,7 @@
     shootButton.addEventListener('touchend', () => isShooting = false);
 
     document.getElementById('startGame').addEventListener('click', startGame);
+
     document.getElementById('upgradeSize').addEventListener('click', () => {
       if (money >= 20 && bulletSizeLevel < 5) {
         bulletSizeLevel++;
@@ -267,6 +278,22 @@
         money -= 20;
         updateUI();
       }
+    });
+
+    // ✅ Keyboard controls
+    document.addEventListener('keydown', (e) => {
+      if (!isGameRunning && (e.code === 'Space' || e.key === ' ')) {
+        startGame();
+      }
+      if (e.code === 'ArrowLeft' || e.key === 'a') moveEntity(stickman, 'left');
+      if (e.code === 'ArrowRight' || e.key === 'd') moveEntity(stickman, 'right');
+      if (e.code === 'ArrowUp' || e.key === 'w') moveEntity(stickman, 'up');
+      if (e.code === 'ArrowDown' || e.key === 's') moveEntity(stickman, 'down');
+      if (e.code === 'Space') isShooting = true;
+    });
+
+    document.addEventListener('keyup', (e) => {
+      if (e.code === 'Space') isShooting = false;
     });
   </script>
 </body>
