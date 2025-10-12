@@ -1,26 +1,150 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Andy’s Favorite Color</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🎨 Andy’s Favorite Color · 安迪最喜欢的颜色</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 40px; background: #f9f9f9; color: #333; }
-    h1 { color: #2c3e50; text-align: center; }
-    p { text-align: center; font-size: 1.2em; }
-    .container { max-width: 800px; margin: auto; background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    .back { display: block; text-align: center; margin-top: 20px; }
-    img { display: block; margin: 20px auto; max-width: 90%; border-radius: 10px; }
+    :root{
+      --ink:#243447; --muted:#5b6b7a; --link:#2a7bd3; --paper:#fff; --bg:#f5f6f8;
+    }
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;}
+    .wrap{max-width:980px;margin:28px auto;padding:0 16px;}
+    header{text-align:center;margin-bottom:16px;}
+    header h1{margin:0 0 6px;font-size:28px;}
+    header .sub{color:var(--muted);margin:0 0 6px;}
+    header .meta{color:var(--muted);font-size:14px;margin:0;}
+
+    .book{position:relative;background:var(--paper);box-shadow:0 10px 30px rgba(0,0,0,.10);border-radius:12px;overflow:hidden;}
+    .page{display:grid;grid-template-columns:1fr;gap:16px;padding:20px;min-height:min(80vh,1000px);align-items:start;}
+    .art{display:flex;justify-content:center;}
+    .art img{max-width:100%;height:auto;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,.08);}
+
+    .captions{border-top:1px dashed #e3e7ee;padding-top:10px;}
+    .cap-title{font-weight:700;margin:0 0 6px;}
+    .cap-block{margin:8px 0;}
+    .en{margin:0;}
+    .zh{margin:4px 0 0;color:#444;font-style:italic;}
+    .num{display:inline-block;min-width:22px;font-weight:700;color:#999;}
+
+    .nav{display:flex;gap:10px;justify-content:space-between;align-items:center;padding:12px 16px;background:#fbfcfe;border-top:1px solid #eef2f7;}
+    .btn{padding:10px 16px;border-radius:10px;border:1px solid #d9e2ec;background:#fff;cursor:pointer;font-weight:600;}
+    .btn[disabled]{opacity:.45;cursor:not-allowed;}
+    .index-link{color:var(--link);text-decoration:none;font-weight:700;}
+    .hint{color:var(--muted);font-size:13px;}
+
+    @media(min-width:980px){
+      .page{grid-template-columns:3fr 2fr;align-items:start;}
+      .captions{border-top:none;border-left:1px dashed #e3e7ee;padding:4px 0 0 16px;}
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🎨 Andy’s Favorite Color</h1>
-    <p>Here are some pictures showing Andy’s favorite color.</p>
-    <img src="page1.jpg" alt="Favorite color page 1">
-    <img src="page2.jpg" alt="Favorite color page 2">
-    <img src="page3.jpg" alt="Favorite color page 3">
-    <img src="page4.jpg" alt="Favorite color page 4">
-    <a class="back" href="../index.html">⬅ Back to homepage</a>
+  <div class="wrap">
+    <header>
+      <h1>🎨 Andy’s Favorite Color · 安迪最喜欢的颜色</h1>
+      <p class="sub">Andy’s short illustrated essay — bilingual, page-by-page. ｜ 安迪的图文短文——中英文逐页对照。</p>
+      <p class="meta"><strong>Published / 出版日期:</strong> 2025-10-12</p>
+    </header>
+
+    <div class="book" aria-live="polite">
+      <div id="page" class="page"></div>
+
+      <div class="nav">
+        <button id="prev" class="btn">⟵ Prev｜上一页</button>
+        <div>
+          <span id="pageNum">Page 1 / 4</span>
+          <span class="hint"> · Tip: ← → keys, swipe ←/→ ｜ 小技巧：方向键或左右滑动翻页</span>
+        </div>
+        <button id="next" class="btn">下一页｜Next ⟶</button>
+      </div>
+    </div>
+
+    <p style="text-align:center;margin:14px 0 0;">
+      <a class="index-link" href="../index.html">⬅ Back to homepage · 返回首页</a>
+    </p>
   </div>
+
+  <script>
+    const PAGES = [
+      {
+        img: "page1.jpg",
+        title: { en: "Cover", zh: "封面" },
+        blocks: [
+          { en: "My favorite color is red.", zh: "我最喜欢的颜色是红色。" },
+          { en: "This is a paragraph written by Andy, Mom, and Dad.", zh: "这是一篇由安迪、妈妈和爸爸一起写的小短文。" }
+        ]
+      },
+      {
+        img: "page2.jpg",
+        title: { en: "Page 2", zh: "第2页" },
+        blocks: [
+          { en: "My favorite color is red.", zh: "我最喜欢的颜色是红色。" },
+          { en: "Red is in many of my favorite books.", zh: "红色出现在我最喜欢的很多书中。" },
+          { en: "Red is on the U.S.A. flag.", zh: "红色在美国国旗上。" },
+          { en: "Red is also on some of my LEGO bricks.", zh: "我的一些乐高积木也是红色的。" },
+          { en: "Red is the first color of the rainbow.", zh: "红色是彩虹的第一种颜色。" },
+          { en: "That’s why red is my favorite color.", zh: "这就是为什么红色是我最喜欢的颜色。" }
+        ]
+      },
+      {
+        img: "page3.jpg",
+        title: { en: "Page 3", zh: "第3页" },
+        blocks: [
+          { en: "Andy did some math and wrote important words.", zh: "安迪做了一些数学题，还写下了重要的词语。" },
+          { en: "Important words: red, favorite books, flag, LEGO, rainbow.", zh: "重要词语：红色、喜欢的书、国旗、乐高、彩虹。" }
+        ]
+      },
+      {
+        img: "page4.jpg",
+        title: { en: "Page 4", zh: "第4页" },
+        blocks: [
+          { en: "Mom and Dad gave feedback: 'Good job! Tier A!'", zh: "妈妈和爸爸给出了反馈：“很好！A级！”" },
+          { en: "Andy wrote a short paragraph about his favorite color.", zh: "安迪写了一篇关于他最喜欢颜色的小短文。" },
+          { en: "Important words: color, red, favorite books, flag, LEGO, rainbow.", zh: "重要词语：颜色、红色、喜欢的书、国旗、乐高、彩虹。" }
+        ]
+      }
+    ];
+
+    const pageEl = document.getElementById('page');
+    const pageNumEl = document.getElementById('pageNum');
+    const prevBtn = document.getElementById('prev');
+    const nextBtn = document.getElementById('next');
+    let i = 0;
+
+    function render(){
+      const p = PAGES[i];
+      pageEl.innerHTML = `
+        <div class="art"><img src="${p.img}" alt="Favorite color ${p.title.en} / ${p.title.zh}"></div>
+        <div class="captions">
+          <p class="cap-title">${p.title.en} · ${p.title.zh}</p>
+          ${p.blocks.map((b,idx)=>`
+            <div class="cap-block">
+              <p class="en"><span class="num">${idx+1}.</span> ${b.en}</p>
+              <p class="zh"><span class="num">${idx+1}.</span> ${b.zh}</p>
+            </div>
+          `).join('')}
+        </div>`;
+      pageNumEl.textContent = `Page ${i+1} / ${PAGES.length}`;
+      prevBtn.disabled = i===0;
+      nextBtn.disabled = i===PAGES.length-1;
+    }
+
+    prevBtn.addEventListener('click', ()=>{ if(i>0){i--;render();}});
+    nextBtn.addEventListener('click', ()=>{ if(i<PAGES.length-1){i++;render();}});
+    document.addEventListener('keydown', e=>{
+      if(e.key==='ArrowLeft') prevBtn.click();
+      if(e.key==='ArrowRight') nextBtn.click();
+    });
+    let x0=null; pageEl.addEventListener('touchstart', e=>x0=e.touches[0].clientX,{passive:true});
+    pageEl.addEventListener('touchend', e=>{
+      if(x0===null)return;
+      const dx=e.changedTouches[0].clientX-x0;
+      if(Math.abs(dx)>40){dx<0?nextBtn.click():prevBtn.click();}
+      x0=null;
+    });
+
+    render();
+  </script>
 </body>
 </html>
