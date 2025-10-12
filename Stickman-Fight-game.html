@@ -3,106 +3,74 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Stickman Fight</title>
+  <title>Stickman Fight · 火柴人大战</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f9f9f9;
-      color: #333;
-    }
-    .container {
-      max-width: 900px;
-      margin: auto;
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      text-align: center;
-    }
-    h1 {
-      color: #2c3e50;
-    }
-    canvas {
-      border: 2px solid #000;
-      display: block;
-      margin: 20px auto;
-      background-color: #ddd;
-      width: 100%;
-      max-width: 600px;
-      height: auto;
-    }
-    .status {
-      font-size: 18px;
-      margin: 10px 0;
-    }
-    .controls, .upgrades {
-      margin: 15px 0;
-    }
-    .move-controls {
-      display: grid;
-      grid-template-rows: repeat(3, 60px);
-      grid-template-columns: repeat(3, 60px);
-      gap: 10px;
-      justify-content: center;
-      margin: 10px auto;
-    }
-    .move-controls button, .shoot-controls button, .upgrades button {
-      width: 60px;
-      height: 60px;
-      font-size: 14px;
-      cursor: pointer;
-      border-radius: 10px;
-      touch-action: manipulation;
-    }
-    .shoot-controls button {
-      padding: 20px 40px;
-      margin-top: 10px;
-    }
-    .back {
-      display: block;
-      margin-top: 20px;
-      font-weight: bold;
-      color: #2980b9;
-      text-decoration: none;
-    }
-    .back:hover {
-      text-decoration: underline;
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f9f9f9; color: #333; }
+    .container { max-width: 900px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center; }
+    h1 { color: #2c3e50; margin-bottom: 8px; }
+    .subtitle { color:#555; margin-top:0; }
+    canvas { border: 2px solid #000; display: block; margin: 20px auto; background-color: #ddd; width: 100%; max-width: 600px; height: auto; }
+    .status { font-size: 18px; margin: 10px 0; }
+    .controls, .upgrades { margin: 15px 0; }
+    .move-controls { display: grid; grid-template-rows: repeat(3, 60px); grid-template-columns: repeat(3, 60px); gap: 10px; justify-content: center; margin: 10px auto; }
+    .move-controls button, .shoot-controls button, .upgrades button { width: 60px; height: 60px; font-size: 14px; cursor: pointer; border-radius: 10px; touch-action: manipulation; }
+    .shoot-controls button { padding: 20px 40px; margin-top: 10px; }
+    .back { display: block; margin-top: 20px; font-weight: bold; color: #2980b9; text-decoration: none; }
+    .back:hover { text-decoration: underline; }
+    .help { max-width: 680px; margin: 10px auto 0; font-size: 0.98rem; color:#444; }
+    .kbd { display:inline-block; padding:2px 6px; border:1px solid #bbb; border-bottom-width:2px; border-radius:4px; background:#f8f8f8; font-family: ui-monospace, monospace; }
+    .zh { color:#444; }
+    @media (max-width: 480px) {
+      .move-controls { grid-template-rows: repeat(3, 50px); grid-template-columns: repeat(3, 50px); }
+      .move-controls button, .upgrades button { width: 50px; height: 50px; font-size: 12px; }
+      .shoot-controls button { padding: 15px 30px; font-size: 16px; }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>⚔️ Stickman Fight</h1>
+    <h1>⚔️ Stickman Fight · 火柴人大战</h1>
+    <p class="subtitle">Arcade shooter — English & Chinese | 街机射击游戏 — 中英文对照</p>
+
     <div class="status">
-      <span id="statusMessage">Press Start or Space to Play!</span><br />
-      <span id="score">Score: 0</span><br />
-      <span id="money">Money: $0</span>
+      <span id="statusMessage">Press <strong>Start</strong> or <span class="kbd">Space</span> to play! <span class="zh">（点击“开始”或按空格键开始！）</span></span><br />
+      <span id="score">Score / 分数: 0</span><br />
+      <span id="money">Money / 金币: $0</span>
     </div>
+
     <canvas id="gameCanvas" width="600" height="400"></canvas>
+
     <div class="controls">
-      <button id="startGame">Start Game</button>
-      <div class="move-controls">
+      <button id="startGame">Start Game｜开始游戏</button>
+      <div class="move-controls" aria-label="Move controls">
         <button></button>
-        <button id="moveUp">▲</button>
+        <button id="moveUp" title="Up / 上">▲</button>
         <button></button>
-        <button id="moveLeft">◄</button>
+        <button id="moveLeft" title="Left / 左">◄</button>
         <button></button>
-        <button id="moveRight">►</button>
+        <button id="moveRight" title="Right / 右">►</button>
         <button></button>
-        <button id="moveDown">▼</button>
+        <button id="moveDown" title="Down / 下">▼</button>
         <button></button>
       </div>
       <div class="shoot-controls">
-        <button id="shoot">Shoot</button>
+        <button id="shoot">Shoot｜射击</button>
       </div>
+
+      <p class="help">
+        <strong>Controls · 操作说明</strong> — 
+        Move: <span class="kbd">←</span><span class="kbd">→</span><span class="kbd">↑</span><span class="kbd">↓</span> or <span class="kbd">W</span><span class="kbd">A</span><span class="kbd">S</span><span class="kbd">D</span>
+        ｜ 移动：方向键或 WASD；
+        Shoot: <span class="kbd">Space</span> ｜ 射击：空格键（长按连发）
+      </p>
     </div>
+
     <div class="upgrades">
-      <button id="upgradeSize">Upgrade Bullet Size</button>
-      <button id="upgradeRate">Upgrade Fire Rate</button>
+      <button id="upgradeSize">Upgrade Bullet Size｜子弹增大</button>
+      <button id="upgradeRate">Upgrade Fire Rate｜射速提升</button>
     </div>
-    <a class="back" href="index.html">⬅ Back to homepage</a>
+
+    <a class="back" href="index.html">⬅ Back to homepage · 返回首页</a>
   </div>
 
   <script>
@@ -120,52 +88,33 @@
     let lastShotTime = 0;
     let isShooting = false;
 
-    const stickman = {
-      x: 50,
-      y: 300,
-      width: 20,
-      height: 50,
-      color: 'blue',
-      speed: 5,
-      bullets: [],
+    const stickman = { x: 50, y: 300, width: 20, height: 50, color: 'blue', speed: 5, bullets: [] };
+    const badGuy  = { x: 500, y: 300, width: 40, height: 60, color: 'red', speed: 1.2, bullets: [], direction: 'left' };
+
+    // Small EN->ZH message map for the status line
+    const zhMap = {
+      'Press Start or Space to Play!': '点击“开始”或按空格键开始！',
+      'Game in progress...': '游戏进行中…',
+      'You got hit! Game Over.': '你被击中了！游戏结束。'
     };
 
-    const badGuy = {
-      x: 500,
-      y: 300,
-      width: 40,
-      height: 60,
-      color: 'red',
-      speed: 1.2,
-      bullets: [],
-      direction: 'left',
-    };
-
-    function drawStickman() {
-      ctx.fillStyle = stickman.color;
-      ctx.fillRect(stickman.x, stickman.y, stickman.width, stickman.height);
-    }
-
-    function drawBadGuy() {
-      ctx.fillStyle = badGuy.color;
-      ctx.fillRect(badGuy.x, badGuy.y, badGuy.width, badGuy.height);
-    }
+    function drawStickman(){ ctx.fillStyle = stickman.color; ctx.fillRect(stickman.x, stickman.y, stickman.width, stickman.height); }
+    function drawBadGuy(){ ctx.fillStyle = badGuy.color; ctx.fillRect(badGuy.x, badGuy.y, badGuy.width, badGuy.height); }
 
     function moveBadGuy() {
       badGuy.x += badGuy.direction === 'left' ? -badGuy.speed : badGuy.speed;
-      if (badGuy.x <= 0 || badGuy.x + badGuy.width >= canvas.width) {
+      if (badGuy.x <= 0 || badGuy.x + badGuy.width >= canvas.width)
         badGuy.direction = badGuy.direction === 'left' ? 'right' : 'left';
-      }
       const r = Math.random();
       if (r < 0.25 && badGuy.y > 0) badGuy.y -= badGuy.speed;
       else if (r < 0.5 && badGuy.y + badGuy.height < canvas.height) badGuy.y += badGuy.speed;
     }
 
     function moveEntity(entity, dir) {
-      if (dir === 'left' && entity.x > 0) entity.x -= entity.speed;
+      if (dir === 'left'  && entity.x > 0) entity.x -= entity.speed;
       if (dir === 'right' && entity.x + entity.width < canvas.width) entity.x += entity.speed;
-      if (dir === 'up' && entity.y > 0) entity.y -= entity.speed;
-      if (dir === 'down' && entity.y + entity.height < canvas.height) entity.y += entity.speed;
+      if (dir === 'up'    && entity.y > 0) entity.y -= entity.speed;
+      if (dir === 'down'  && entity.y + entity.height < canvas.height) entity.y += entity.speed;
     }
 
     function shootBullet(shooter, target) {
@@ -187,55 +136,42 @@
       bullets.forEach((b, i) => {
         ctx.fillStyle = shooterType === 'stickman' ? 'blue' : 'black';
         ctx.fillRect(b.x, b.y, b.width, b.height);
-        b.x += b.dx;
-        b.y += b.dy;
-        if (
-          b.x < target.x + target.width &&
-          b.x + b.width > target.x &&
-          b.y < target.y + target.height &&
-          b.y + b.height > target.y
-        ) {
+        b.x += b.dx; b.y += b.dy;
+        // collision
+        if (b.x < target.x + target.width && b.x + b.width > target.x &&
+            b.y < target.y + target.height && b.y + b.height > target.y) {
           if (shooterType === 'stickman') {
-            score += 10;
-            money += 10;
-            updateUI();
-            resetGame();
-            startGame();
+            score += 10; money += 10; updateUI(); resetGame(); startGame();
           } else {
             updateStatus('You got hit! Game Over.');
-            resetGame();
-            setTimeout(startGame, 2000);
+            resetGame(); setTimeout(startGame, 2000);
           }
         }
+        // off screen
         if (b.x < 0 || b.x > canvas.width || b.y < 0 || b.y > canvas.height) bullets.splice(i, 1);
       });
     }
 
     function updateUI() {
-      scoreDisplay.textContent = `Score: ${score}`;
-      moneyDisplay.textContent = `Money: $${money}`;
+      scoreDisplay.textContent = `Score / 分数: ${score}`;
+      moneyDisplay.textContent = `Money / 金币: $${money}`;
     }
 
     function updateStatus(msg) {
-      statusMessage.textContent = msg;
+      const zh = zhMap[msg] || '';
+      statusMessage.innerHTML = `${msg} ${zh ? `<span class="zh">（${zh}）</span>` : ''}`;
     }
 
     function resetGame() {
       isGameRunning = false;
-      stickman.x = 50;
-      stickman.y = 300;
-      stickman.bullets = [];
-      badGuy.x = 500;
-      badGuy.y = 300;
-      badGuy.bullets = [];
+      stickman.x = 50; stickman.y = 300; stickman.bullets = [];
+      badGuy.x = 500;  badGuy.y = 300;  badGuy.bullets = [];
     }
 
     function gameLoop() {
       if (!isGameRunning) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawStickman();
-      drawBadGuy();
-      moveBadGuy();
+      drawStickman(); drawBadGuy(); moveBadGuy();
       drawBullets(stickman.bullets, badGuy, 'stickman');
       drawBullets(badGuy.bullets, stickman, 'badGuy');
       if (Math.random() < 0.02) shootBullet(badGuy, stickman);
@@ -266,35 +202,23 @@
     document.getElementById('startGame').addEventListener('click', startGame);
 
     document.getElementById('upgradeSize').addEventListener('click', () => {
-      if (money >= 20 && bulletSizeLevel < 5) {
-        bulletSizeLevel++;
-        money -= 20;
-        updateUI();
-      }
+      if (money >= 20 && bulletSizeLevel < 5) { bulletSizeLevel++; money -= 20; updateUI(); }
     });
     document.getElementById('upgradeRate').addEventListener('click', () => {
-      if (money >= 20 && fireRateLevel < 5) {
-        fireRateLevel++;
-        money -= 20;
-        updateUI();
-      }
+      if (money >= 20 && fireRateLevel < 5) { fireRateLevel++; money -= 20; updateUI(); }
     });
 
-    // ✅ Keyboard controls
+    // Keyboard controls (WASD / Arrows + Space)
     document.addEventListener('keydown', (e) => {
-      if (!isGameRunning && (e.code === 'Space' || e.key === ' ')) {
-        startGame();
-      }
-      if (e.code === 'ArrowLeft' || e.key === 'a') moveEntity(stickman, 'left');
-      if (e.code === 'ArrowRight' || e.key === 'd') moveEntity(stickman, 'right');
-      if (e.code === 'ArrowUp' || e.key === 'w') moveEntity(stickman, 'up');
-      if (e.code === 'ArrowDown' || e.key === 's') moveEntity(stickman, 'down');
+      if (!isGameRunning && (e.code === 'Space' || e.key === ' ')) startGame();
+      if (e.code === 'ArrowLeft'  || e.key.toLowerCase() === 'a') moveEntity(stickman, 'left');
+      if (e.code === 'ArrowRight' || e.key.toLowerCase() === 'd') moveEntity(stickman, 'right');
+      if (e.code === 'ArrowUp'    || e.key.toLowerCase() === 'w') moveEntity(stickman, 'up');
+      if (e.code === 'ArrowDown'  || e.key.toLowerCase() === 's') moveEntity(stickman, 'down');
       if (e.code === 'Space') isShooting = true;
     });
 
-    document.addEventListener('keyup', (e) => {
-      if (e.code === 'Space') isShooting = false;
-    });
+    document.addEventListener('keyup', (e) => { if (e.code === 'Space') isShooting = false; });
   </script>
 </body>
 </html>
