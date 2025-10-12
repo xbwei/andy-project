@@ -1,24 +1,130 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Andy’s Favorite Game</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🎮 Andy’s Favorite Game · 安迪最喜欢的游戏</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 40px; background: #f9f9f9; color: #333; }
-    h1 { color: #2c3e50; text-align: center; }
-    p { text-align: center; font-size: 1.2em; }
-    .container { max-width: 800px; margin: auto; background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    .back { display: block; text-align: center; margin-top: 20px; }
-    img { display: block; margin: 20px auto; max-width: 90%; border-radius: 10px; }
+    :root{ --ink:#243447; --muted:#5b6b7a; --link:#2a7bd3; --paper:#fff; --bg:#f5f6f8; }
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;}
+    .wrap{max-width:980px;margin:28px auto;padding:0 16px;}
+    header{text-align:center;margin-bottom:16px;}
+    header h1{margin:0 0 6px;font-size:28px;}
+    header .sub{color:var(--muted);margin:0 0 6px;}
+    header .meta{color:var(--muted);font-size:14px;margin:0;}
+
+    .book{position:relative;background:var(--paper);box-shadow:0 10px 30px rgba(0,0,0,.10);border-radius:12px;overflow:hidden;}
+    .page{display:grid;grid-template-columns:1fr;gap:16px;padding:20px;min-height:min(80vh,1000px);align-items:start;}
+    .art{display:flex;justify-content:center;}
+    .art img{max-width:100%;height:auto;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,.08);}
+
+    .captions{border-top:1px dashed #e3e7ee;padding-top:10px;}
+    .cap-title{font-weight:700;margin:0 0 6px;}
+    .cap-block{margin:8px 0;}
+    .en{margin:0;}
+    .zh{margin:4px 0 0;color:#444;font-style:italic;}
+    .num{display:inline-block;min-width:22px;font-weight:700;color:#999;}
+
+    .nav{display:flex;gap:10px;justify-content:space-between;align-items:center;padding:12px 16px;background:#fbfcfe;border-top:1px solid #eef2f7;}
+    .btn{padding:10px 16px;border-radius:10px;border:1px solid #d9e2ec;background:#fff;cursor:pointer;font-weight:600;}
+    .btn[disabled]{opacity:.45;cursor:not-allowed;}
+    .index-link{color:var(--link);text-decoration:none;font-weight:700;}
+    .hint{color:var(--muted);font-size:13px;}
+
+    @media(min-width:980px){
+      .page{grid-template-columns:3fr 2fr;align-items:start;}
+      .captions{border-top:none;border-left:1px dashed #e3e7ee;padding:4px 0 0 16px;}
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🎮 Andy’s Favorite Game</h1>
-    <p>Here are some pictures showing Andy’s favorite game.</p>
-    <img src="page1.jpg" alt="Favorite game page 1">
-    <img src="page2.jpg" alt="Favorite game page 2">
-    <a class="back" href="../index.html">⬅ Back to homepage</a>
+  <div class="wrap">
+    <header>
+      <h1>🎮 Andy’s Favorite Game · 安迪最喜欢的游戏</h1>
+      <p class="sub">Bilingual mini-book — page by page ｜ 中英文对照的小册子 · 逐页阅读</p>
+      <p class="meta"><strong>Published / 出版日期:</strong> 2025-10-12</p>
+    </header>
+
+    <div class="book" aria-live="polite">
+      <div id="page" class="page"></div>
+
+      <div class="nav">
+        <button id="prev" class="btn" aria-label="Previous page">⟵ Prev｜上一页</button>
+        <div>
+          <span id="pageNum">Page 1 / 2</span>
+          <span class="hint"> · Tip: ← → keys, swipe ←/→ ｜ 小技巧：方向键或左右滑动翻页</span>
+        </div>
+        <button id="next" class="btn" aria-label="Next page">下一页｜Next ⟶</button>
+      </div>
+    </div>
+
+    <p style="text-align:center;margin:14px 0 0;">
+      <a class="index-link" href="../index.html">⬅ Back to homepage · 返回首页</a>
+    </p>
   </div>
+
+  <script>
+    // Update file names if yours differ (expects page1.jpg, page2.jpg)
+    const PAGES = [
+      {
+        img: "page1.jpg",
+        title: { en: "Cover", zh: "封面" },
+        blocks: [
+          { en: "My favorite video game: Minecraft.", zh: "我最喜欢的电子游戏：Minecraft（我的世界）。" },
+          { en: "By Andy.", zh: "作者：安迪。" }
+        ]
+      },
+      {
+        img: "page2.jpg",
+        title: { en: "Why I like Minecraft", zh: "我为什么喜欢《我的世界》" },
+        blocks: [
+          { en: "My favorite video game is Minecraft.", zh: "我最喜欢的游戏是《我的世界》。" },
+          { en: "Minecraft is fun, and sometimes it’s funny.", zh: "它很好玩，有时候还很有趣。" },
+          { en: "It has lots of colorful blocks.", zh: "游戏里有很多五颜六色的方块。" },
+          { en: "That’s why Minecraft is my favorite game.", zh: "这就是我最喜欢它的原因。" }
+        ]
+      }
+    ];
+
+    const pageEl = document.getElementById('page');
+    const pageNumEl = document.getElementById('pageNum');
+    const prevBtn = document.getElementById('prev');
+    const nextBtn = document.getElementById('next');
+    let i = 0;
+
+    function render(){
+      const p = PAGES[i];
+      pageEl.innerHTML = `
+        <div class="art"><img src="${p.img}" alt="Favorite game ${p.title.en} / ${p.title.zh}"></div>
+        <div class="captions">
+          <p class="cap-title">${p.title.en} · ${p.title.zh}</p>
+          ${p.blocks.map((b,idx)=>`
+            <div class="cap-block">
+              <p class="en"><span class="num">${idx+1}.</span> ${b.en}</p>
+              <p class="zh"><span class="num">${idx+1}.</span> ${b.zh}</p>
+            </div>
+          `).join('')}
+        </div>`;
+      pageNumEl.textContent = `Page ${i+1} / ${PAGES.length}`;
+      prevBtn.disabled = i===0;
+      nextBtn.disabled = i===PAGES.length-1;
+    }
+
+    prevBtn.addEventListener('click', ()=>{ if(i>0){i--;render();}});
+    nextBtn.addEventListener('click', ()=>{ if(i<PAGES.length-1){i++;render();}});
+    document.addEventListener('keydown', e=>{
+      if(e.key==='ArrowLeft') prevBtn.click();
+      if(e.key==='ArrowRight') nextBtn.click();
+    });
+    let x0=null; pageEl.addEventListener('touchstart', e=>x0=e.touches[0].clientX,{passive:true});
+    pageEl.addEventListener('touchend', e=>{
+      if(x0===null)return;
+      const dx=e.changedTouches[0].clientX-x0;
+      if(Math.abs(dx)>40){dx<0?nextBtn.click():prevBtn.click();}
+      x0=null;
+    });
+
+    render();
+  </script>
 </body>
 </html>
