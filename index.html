@@ -2,25 +2,91 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Andy’s Work · 安迪的作品</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body { font-family: Arial, sans-serif; margin: 40px; background: #f9f9f9; color: #333; }
-    .container { max-width: 900px; margin: auto; background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    h1 { color: #2c3e50; text-align: center; margin: 0 0 6px; }
-    .subtitle { text-align: center; margin: 0 0 20px; color: #555; }
-    ul { list-style: none; padding: 0; max-width: 800px; margin: 30px auto; }
-    li { margin: 14px 0; text-align: center; }
-    a { text-decoration: none; color: #2980b9; font-weight: bold; font-size: 1.08em; }
+    :root {
+      --ink:#243447; --muted:#5b6b7a; --link:#2a7bd3; 
+      --paper:#fff; --bg:#f5f6f8;
+    }
+    html, body {
+      margin:0; padding:0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    }
+    .wrap {
+      max-width: 960px;
+      margin: 40px auto;
+      background: var(--paper);
+      border-radius: 12px;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.1);
+      padding: 40px 20px 30px;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    header h1 {
+      font-size: 32px;
+      margin: 0 0 8px;
+    }
+    header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 1.05em;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      max-width: 720px;
+      margin: 40px auto;
+    }
+    li {
+      margin: 16px 0;
+      background: #fafbfc;
+      border: 1px solid #e6ebf1;
+      border-radius: 10px;
+      padding: 14px 18px;
+      transition: background .2s;
+      text-align: center;
+    }
+    li:hover { background:#f0f4f8; }
+    a {
+      text-decoration: none;
+      color: var(--link);
+      font-weight: 600;
+      font-size: 1.12em;
+    }
     a:hover { text-decoration: underline; }
-    .new { font-size: 0.9em; background:#ffeaa7; color:#8e5a00; padding: 2px 8px; border-radius: 999px; margin-left: 6px; }
-    .zh { color:#444; font-weight: normal; margin-left: 6px; }
+    .zh {
+      color: #444;
+      font-weight: normal;
+      margin-left: 6px;
+    }
+    .new {
+      font-size: 0.85em;
+      background: #ffeaa7;
+      color: #8e5a00;
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-left: 8px;
+    }
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9em;
+      margin-top: 40px;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Andy’s Work · 安迪的作品</h1>
-    <p class="subtitle">Projects in coding & writing · 编程与写作作品集</p>
+  <div class="wrap">
+    <header>
+      <h1>Andy’s Work · 安迪的作品</h1>
+      <p>Projects in coding & writing · 编程与写作作品集</p>
+    </header>
 
     <ul>
       <li>
@@ -29,22 +95,26 @@
         <span class="new">NEW</span>
       </li>
       <li>
-        <a href="favorite-color/">🎨 Andy’s favorite color</a>
+        <a href="favorite-color/">🎨 Andy’s Favorite Color</a>
         <span class="zh">（安迪最喜欢的颜色）</span>
       </li>
       <li>
-        <a href="favorite-game/">🎮 Andy’s favorite game</a>
+        <a href="favorite-game/">🎮 Andy’s Favorite Game</a>
         <span class="zh">（安迪最喜欢的游戏）</span>
       </li>
       <li>
-        <a href="dogman/">📚 Dogman</a>
+        <a href="dogman/">📚 Dog Man</a>
         <span class="zh">（狗狗侠）</span>
       </li>
       <li>
-        <a href="Stickman-Fight-game.html">⚔️ A web game created with ChatGPT</a>
-        <span class="zh">（与 ChatGPT 一起做的网页游戏）</span>
+        <a href="Stickman-Fight-game.html">⚔️ A Web Game Created with ChatGPT</a>
+        <span class="zh">（与 ChatGPT 一起制作的网页游戏）</span>
       </li>
     </ul>
+
+    <footer>
+      <p>© 2025 Andy’s Family · Updated Oct 12, 2025 ｜ 安迪家庭作品 · 更新于 2025年10月12日</p>
+    </footer>
   </div>
 </body>
 </html>
