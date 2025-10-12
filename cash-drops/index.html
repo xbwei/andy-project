@@ -2,119 +2,215 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cash Drops — by Andy · 现金空投——安迪著</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cash Drops · 现金空投 — Book Reader</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f9f9f9; color: #333; }
-    .container { max-width: 900px; margin: 40px auto; background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    h1 { color: #2c3e50; text-align: center; margin: 0 0 6px; }
-    .subtitle { text-align: center; margin: 0 0 12px; color:#555; }
-    .meta { text-align:center; color:#666; margin-bottom: 20px; }
-    .page-block { margin-bottom: 40px; }
-    .page-img { display:block; margin:16px auto; max-width:95%; border-radius:10px; }
-    .caption { text-align:center; font-size:1.05em; margin-top:10px; }
-    .zh { color:#444; font-style:italic; }
-    a.back { display:block; text-align:center; margin-top:22px; font-weight:bold; text-decoration:none; color:#2980b9; }
-    a.back:hover { text-decoration: underline; }
+    :root{
+      --ink:#243447; --muted:#5b6b7a; --link:#2a7bd3; --paper:#fff; --bg:#f5f6f8;
+    }
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;}
+    .wrap{max-width:980px;margin:28px auto;padding:0 16px;}
+    header{ text-align:center;margin-bottom:16px;}
+    header h1{margin:0 0 6px;font-size:28px;}
+    header .sub{color:var(--muted);margin:0 0 6px;}
+    header .meta{color:var(--muted);font-size:14px;margin:0;}
+
+    /* Book shell */
+    .book{
+      position:relative;
+      background:var(--paper);
+      box-shadow:0 10px 30px rgba(0,0,0,.10);
+      border-radius:12px;
+      overflow:hidden;
+    }
+    .page{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:16px;
+      padding:20px;
+      min-height: min(85vh, 1200px);
+      align-items:start;
+    }
+    .art{
+      display:flex; justify-content:center;
+    }
+    .art img{
+      max-width:100%; height:auto; border-radius:10px;
+      box-shadow:0 2px 12px rgba(0,0,0,.08);
+    }
+
+    /* Bilingual caption area aligned to the displayed page */
+    .captions{
+      border-top:1px dashed #e3e7ee; padding-top:10px;
+    }
+    .cap-title{font-weight:700;margin:0 0 6px;}
+    .cap-block{margin:8px 0;}
+    .en{margin:0;}
+    .zh{margin:4px 0 0;color:#444;font-style:italic;}
+    .num{display:inline-block; min-width:22px; font-weight:700; color:#999;}
+
+    /* Controls */
+    .nav{
+      display:flex; gap:10px; justify-content:space-between; align-items:center;
+      padding:12px 16px; background:#fbfcfe; border-top:1px solid #eef2f7;
+    }
+    .btn{
+      padding:10px 16px; border-radius:10px; border:1px solid #d9e2ec;
+      background:#fff; cursor:pointer; font-weight:600;
+    }
+    .btn[disabled]{opacity:.45; cursor:not-allowed;}
+    .index-link{ color:var(--link); text-decoration:none; font-weight:700; }
+    .hint{ color:var(--muted); font-size:13px;}
+
+    /* Small tidy for big screens: put caption to right like a book margin note */
+    @media(min-width: 980px){
+      .page{ grid-template-columns: 3fr 2fr; align-items:start;}
+      .captions{ border-top:none; border-left:1px dashed #e3e7ee; padding:4px 0 0 16px;}
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>💵 Cash Drops · 现金空投</h1>
-    <p class="subtitle">
-      A new comic by Andy — enjoy the story in English and Chinese.<br>
-      安迪的新漫画——中英文对照阅读。
+  <div class="wrap">
+    <header>
+      <h1>💵 Cash Drops · 现金空投</h1>
+      <p class="sub">A new comic by Andy — bilingual, page-by-page. ｜ 安迪的新漫画——中英文逐页对照阅读。</p>
+      <p class="meta"><strong>Published / 出版日期:</strong> 2025-10-12</p>
+    </header>
+
+    <div class="book" aria-live="polite">
+      <div id="page" class="page">
+        <!-- JS injects the current page image + aligned captions here -->
+      </div>
+
+      <div class="nav">
+        <button id="prev" class="btn" aria-label="Previous page">⟵ Prev｜上一页</button>
+        <div>
+          <span id="pageNum">Page 1 / 6</span>
+          <span class="hint"> · Tip: ← → keys, swipe ←/→ ｜ 小技巧：方向键或左右滑动翻页</span>
+        </div>
+        <button id="next" class="btn" aria-label="Next page">下一页｜Next ⟶</button>
+      </div>
+    </div>
+
+    <p style="text-align:center;margin:14px 0 0;">
+      <a class="index-link" href="../index.html">⬅ Back to homepage · 返回首页</a>
     </p>
-    <p class="meta"><strong>Published:</strong> 2025-10-12 &nbsp;|&nbsp; <strong>出版日期：</strong>2025年10月12日</p>
-
-    <!-- Page 1 -->
-    <div class="page-block">
-      <img class="page-img" src="page-1.jpg" alt="Cash Drops cover 现金空投 封面">
-      <p class="caption">Cover · 封面</p>
-    </div>
-
-    <!-- Page 2 -->
-    <div class="page-block">
-      <img class="page-img" src="page-2.jpg" alt="Cash Drops page 2">
-      <p class="caption">
-        Once a guy pushed a button. Then cash drops fell from the sky.  
-        <br><span class="zh">有一天，一个人按下了一个按钮。然后现金从天而降。</span>
-      </p>
-      <p class="caption">
-        So he started searching to find where the cash drops were made.  
-        <br><span class="zh">于是他开始寻找这些现金空投是在哪里制造的。</span>
-      </p>
-      <p class="caption">
-        He arrived at the military and thought they were made there.  
-        <br><span class="zh">他来到军营，以为这些现金是在那里制造的。</span>
-      </p>
-    </div>
-
-    <!-- Page 3 -->
-    <div class="page-block">
-      <img class="page-img" src="page-3.jpg" alt="Cash Drops page 3">
-      <p class="caption">
-        He searched many places and became very tired.  
-        <br><span class="zh">他到处寻找，非常疲惫。</span>
-      </p>
-      <p class="caption">
-        So he went back home and slept for seventeen hours!  
-        <br><span class="zh">于是他回家睡觉，一睡就是十七个小时！</span>
-      </p>
-    </div>
-
-    <!-- Page 4 -->
-    <div class="page-block">
-      <img class="page-img" src="page-4.jpg" alt="Cash Drops page 4">
-      <p class="caption">
-        When he woke up, he got out of his house and started searching again.  
-        <br><span class="zh">醒来后，他走出房子，又开始继续寻找。</span>
-      </p>
-      <p class="caption">
-        Then his friend came over. “What are you doing?” the friend asked.  
-        <br><span class="zh">这时他的朋友过来了。“你在干什么？”朋友问。</span>
-      </p>
-      <p class="caption">
-        “I’m searching where the cash drops are from. Can I help?”  
-        <br><span class="zh">“我在找这些现金从哪里来的。”“我可以帮你吗？”</span>
-      </p>
-      <p class="caption">
-        “Yes!”  
-        <br><span class="zh">“当然可以！”</span>
-      </p>
-    </div>
-
-    <!-- Page 5 -->
-    <div class="page-block">
-      <img class="page-img" src="page-5.jpg" alt="Cash Drops page 5">
-      <p class="caption">
-        So they went searching together. But wait — what is this?  
-        <br><span class="zh">于是他们一起去寻找。但等一下——这是什么？</span>
-      </p>
-      <p class="caption">
-        They arrived at the military base again.  
-        <br><span class="zh">他们又来到了军营。</span>
-      </p>
-      <p class="caption">
-        “Why are you here?” the soldiers asked.  
-        <br><span class="zh">士兵问他们：“你们为什么在这里？”</span>
-      </p>
-    </div>
-
-    <!-- Page 6 -->
-    <div class="page-block">
-      <img class="page-img" src="page-6.jpg" alt="Cash Drops page 6">
-      <p class="caption">
-        “Do you know about the cash drops?” asked the boy.  
-        <br><span class="zh">“你们知道现金空投的事吗？”男孩问。</span>
-      </p>
-      <p class="caption">
-        “Yes, now we know,” said the soldiers. The End.  
-        <br><span class="zh">“知道了，现在我们都明白了。” 士兵说。——结束。</span>
-      </p>
-    </div>
-
-    <a class="back" href="../index.html">⬅ Back to homepage · 返回首页</a>
   </div>
+
+  <script>
+    // Each entry = one scanned page with its bilingual text blocks aligned in order
+    const PAGES = [
+      {
+        img: "page-1.jpg",
+        title: { en: "Cover", zh: "封面" },
+        blocks: []
+      },
+      {
+        img: "page-2.jpg",
+        title: { en: "Page 2", zh: "第2页" },
+        blocks: [
+          { en: "Once a guy pushed a button. Then cash drops fell from the sky.",
+            zh: "有一天，一个人按下了一个按钮。然后现金从天而降。" },
+          { en: "So he started searching to find where the cash drops were made.",
+            zh: "于是他开始寻找这些现金空投是在哪里制造的。" },
+          { en: "He arrived at the military and thought they were made there.",
+            zh: "他来到军营，以为这些现金是在那里制造的。" }
+        ]
+      },
+      {
+        img: "page-3.jpg",
+        title: { en: "Page 3", zh: "第3页" },
+        blocks: [
+          { en: "He searched many places and became very tired.",
+            zh: "他到处寻找，非常疲惫。" },
+          { en: "So he went back home and slept for seventeen hours!",
+            zh: "于是他回家睡觉，一睡就是十七个小时！" }
+        ]
+      },
+      {
+        img: "page-4.jpg",
+        title: { en: "Page 4", zh: "第4页" },
+        blocks: [
+          { en: "When he woke up, he left the house and started searching again.",
+            zh: "醒来后，他走出房子，又继续寻找。" },
+          { en: "Then his friend came over. “What are you doing?”",
+            zh: "这时朋友过来了：“你在干什么？”" },
+          { en: "“I'm searching where the cash drops are from. Can I help?” — “Yes!”",
+            zh: "“我在找现金空投从哪里来。”“我可以帮你吗？”——“当然可以！”" }
+        ]
+      },
+      {
+        img: "page-5.jpg",
+        title: { en: "Page 5", zh: "第5页" },
+        blocks: [
+          { en: "They searched together. But wait—what is this?",
+            zh: "他们一起寻找。等等——这是什么？" },
+          { en: "They arrived at the military base again.",
+            zh: "他们又来到了军营。" },
+          { en: "“Why are you here?” asked the soldiers.",
+            zh: "士兵问：“你们为什么在这里？”" }
+        ]
+      },
+      {
+        img: "page-6.jpg",
+        title: { en: "Page 6", zh: "第6页" },
+        blocks: [
+          { en: "“Do you know about the cash drops?” asked the boy.",
+            zh: "男孩问：“你们知道现金空投的事吗？”" },
+          { en: "“Yes, now we know,” said the soldiers. The End.",
+            zh: "“知道了，现在我们都明白了。”士兵说。——结束。" }
+        ]
+      }
+    ];
+
+    const pageEl = document.getElementById('page');
+    const pageNumEl = document.getElementById('pageNum');
+    const prevBtn = document.getElementById('prev');
+    const nextBtn = document.getElementById('next');
+
+    let i = 0;
+
+    function render() {
+      const p = PAGES[i];
+      pageEl.innerHTML = `
+        <div class="art">
+          <img src="${p.img}" alt="Cash Drops ${p.title.en} / ${p.title.zh}" />
+        </div>
+        <div class="captions">
+          <p class="cap-title">${p.title.en} · ${p.title.zh}</p>
+          ${p.blocks.map((b, idx) => `
+            <div class="cap-block">
+              <p class="en"><span class="num">${idx+1}.</span> ${b.en}</p>
+              <p class="zh"><span class="num">${idx+1}.</span> ${b.zh}</p>
+            </div>
+          `).join('')}
+        </div>
+      `;
+      pageNumEl.textContent = `Page ${i+1} / ${PAGES.length}`;
+      prevBtn.disabled = i === 0;
+      nextBtn.disabled = i === PAGES.length - 1;
+    }
+
+    prevBtn.addEventListener('click', () => { if(i>0){ i--; render(); }});
+    nextBtn.addEventListener('click', () => { if(i<PAGES.length-1){ i++; render(); }});
+
+    // Keyboard arrows to flip pages
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowLeft') prevBtn.click();
+      if (e.key === 'ArrowRight') nextBtn.click();
+    });
+
+    // Basic swipe (mobile)
+    let x0=null;
+    pageEl.addEventListener('touchstart', e=> x0 = e.touches[0].clientX, {passive:true});
+    pageEl.addEventListener('touchend', e=>{
+      if(x0===null) return;
+      const dx = e.changedTouches[0].clientX - x0;
+      if (Math.abs(dx) > 40) { dx<0 ? nextBtn.click() : prevBtn.click(); }
+      x0=null;
+    });
+
+    render();
+  </script>
 </body>
 </html>
