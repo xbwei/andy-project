@@ -14,12 +14,13 @@
     .controls, .upgrades { margin: 15px 0; }
     .move-controls { display: grid; grid-template-rows: repeat(3, 60px); grid-template-columns: repeat(3, 60px); gap: 10px; justify-content: center; margin: 10px auto; }
     .move-controls button, .shoot-controls button, .upgrades button { width: 60px; height: 60px; font-size: 14px; cursor: pointer; border-radius: 10px; touch-action: manipulation; }
-    .shoot-controls button { padding: 20px 40px; margin-top: 10px; }
+    .shoot-controls button { padding: 20px 40px; margin-top: 10px; height: auto; }
     .back { display: block; margin-top: 20px; font-weight: bold; color: #2980b9; text-decoration: none; }
     .back:hover { text-decoration: underline; }
     .help { max-width: 680px; margin: 10px auto 0; font-size: 0.98rem; color:#444; }
     .kbd { display:inline-block; padding:2px 6px; border:1px solid #bbb; border-bottom-width:2px; border-radius:4px; background:#f8f8f8; font-family: ui-monospace, monospace; }
     .zh { color:#444; }
+    .info-line { margin-top: 5px; font-size: 0.95rem; }
     @media (max-width: 480px) {
       .move-controls { grid-template-rows: repeat(3, 50px); grid-template-columns: repeat(3, 50px); }
       .move-controls button, .upgrades button { width: 50px; height: 50px; font-size: 12px; }
@@ -33,15 +34,22 @@
     <p class="subtitle">Arcade shooter — English & Chinese | 街机射击游戏 — 中英文对照</p>
 
     <div class="status">
-      <span id="statusMessage">Press <strong>Start</strong> or <span class="kbd">Space</span> to play! <span class="zh">（点击“开始”或按空格键开始！）</span></span><br />
+      <span id="statusMessage">
+        Press <strong>Start</strong> or <span class="kbd">Space</span> to play!
+        <span class="zh">（点击“开始”或按空格键开始！）</span>
+      </span><br />
       <span id="score">Score / 分数: 0</span><br />
-      <span id="money">Money / 金币: $0</span>
+      <span id="money">Money / 金币: $0</span><br />
+      <span id="level">Level / 关卡: 1</span><br />
+      <span id="playerHp">HP / 生命: 3</span>
     </div>
 
     <canvas id="gameCanvas" width="600" height="400"></canvas>
 
     <div class="controls">
       <button id="startGame">Start Game｜开始游戏</button>
+      <button id="pauseGame">Pause｜暂停</button>
+
       <div class="move-controls" aria-label="Move controls">
         <button></button>
         <button id="moveUp" title="Up / 上">▲</button>
@@ -53,6 +61,7 @@
         <button id="moveDown" title="Down / 下">▼</button>
         <button></button>
       </div>
+
       <div class="shoot-controls">
         <button id="shoot">Shoot｜射击</button>
       </div>
@@ -61,13 +70,17 @@
         <strong>Controls · 操作说明</strong> — 
         Move: <span class="kbd">←</span><span class="kbd">→</span><span class="kbd">↑</span><span class="kbd">↓</span> or <span class="kbd">W</span><span class="kbd">A</span><span class="kbd">S</span><span class="kbd">D</span>
         ｜ 移动：方向键或 WASD；
-        Shoot: <span class="kbd">Space</span> ｜ 射击：空格键（长按连发）
+        Shoot: <span class="kbd">Space</span> ｜ 射击：空格键（长按连发）；
+        Pause: <span class="kbd">P</span> ｜ 暂停：P
       </p>
     </div>
 
     <div class="upgrades">
-      <button id="upgradeSize">Upgrade Bullet Size｜子弹增大</button>
-      <button id="upgradeRate">Upgrade Fire Rate｜射速提升</button>
+      <p class="info-line">
+        Upgrades only affect the player, not enemies. 升级只对玩家有效，对敌人无效。
+      </p>
+      <button id="upgradeSize">Upgrade Bullet Size｜子弹增大（$20）</button>
+      <button id="upgradeRate">Upgrade Fire Rate｜射速提升（$20）</button>
     </div>
 
     <a class="back" href="index.html">⬅ Back to homepage · 返回首页</a>
@@ -76,38 +89,122 @@
   <script>
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
+
     const statusMessage = document.getElementById('statusMessage');
     const scoreDisplay = document.getElementById('score');
     const moneyDisplay = document.getElementById('money');
+    const levelDisplay = document.getElementById('level');
+    const playerHpDisplay = document.getElementById('playerHp');
 
-    let isGameRunning = false;
+    const startButton = document.getElementById('startGame');
+    const pauseButton = document.getElementById('pauseGame');
+    const shootButton = document.getElementById('shoot');
+
+    let isRunning = false;
+    let isPaused = false;
     let score = 0;
     let money = 0;
-    let bulletSizeLevel = 1;
-    let fireRateLevel = 1;
-    let lastShotTime = 0;
+    let level = 1;
+
+    let bulletSizeLevel = 1; // affects only player
+    let fireRateLevel = 1;   // affects only player
+
     let isShooting = false;
 
-    const stickman = { x: 50, y: 300, width: 20, height: 50, color: 'blue', speed: 5, bullets: [] };
-    const badGuy  = { x: 500, y: 300, width: 40, height: 60, color: 'red', speed: 1.2, bullets: [], direction: 'left' };
+    // Simple sound with Web Audio API
+    let audioCtx = null;
+    function playBeep(frequency, duration) {
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.frequency.value = frequency;
+        gain.gain.value = 0.1;
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        setTimeout(() => osc.stop(), duration);
+      } catch (e) {
+        // ignore audio errors
+      }
+    }
 
-    // Small EN->ZH message map for the status line
+    // Player
+    const player = {
+      x: 60,
+      y: 300,
+      width: 20,
+      height: 50,
+      color: 'blue',
+      speed: 5,
+      bullets: [],
+      hp: 3,
+      maxHp: 3,
+      lastShotTime: 0,
+      hitFlashTime: 0
+    };
+
+    // Enemies
+    let enemies = [];
+
+    // Status text map
     const zhMap = {
       'Press Start or Space to Play!': '点击“开始”或按空格键开始！',
       'Game in progress...': '游戏进行中…',
-      'You got hit! Game Over.': '你被击中了！游戏结束。'
+      'Paused.': '已暂停。',
+      'You were defeated. Game Over.': '你被击败了，游戏结束。',
+      'Level cleared!': '这一关通过了！'
     };
 
-    function drawStickman(){ ctx.fillStyle = stickman.color; ctx.fillRect(stickman.x, stickman.y, stickman.width, stickman.height); }
-    function drawBadGuy(){ ctx.fillStyle = badGuy.color; ctx.fillRect(badGuy.x, badGuy.y, badGuy.width, badGuy.height); }
+    function updateStatus(msg) {
+      const zh = zhMap[msg] || '';
+      statusMessage.innerHTML = `${msg} ${zh ? '<span class="zh">（' + zh + '）</span>' : ''}`;
+    }
 
-    function moveBadGuy() {
-      badGuy.x += badGuy.direction === 'left' ? -badGuy.speed : badGuy.speed;
-      if (badGuy.x <= 0 || badGuy.x + badGuy.width >= canvas.width)
-        badGuy.direction = badGuy.direction === 'left' ? 'right' : 'left';
-      const r = Math.random();
-      if (r < 0.25 && badGuy.y > 0) badGuy.y -= badGuy.speed;
-      else if (r < 0.5 && badGuy.y + badGuy.height < canvas.height) badGuy.y += badGuy.speed;
+    function updateUI() {
+      scoreDisplay.textContent = `Score / 分数: ${score}`;
+      moneyDisplay.textContent = `Money / 金币: $${money}`;
+      levelDisplay.textContent = `Level / 关卡: ${level}`;
+      playerHpDisplay.textContent = `HP / 生命: ${player.hp}`;
+    }
+
+    function resetPlayer() {
+      player.x = 60;
+      player.y = 300;
+      player.bullets = [];
+      player.hp = player.maxHp;
+      player.hitFlashTime = 0;
+    }
+
+    function createEnemy(levelIndex, indexInLevel) {
+      const baseY = 80;
+      const spacingY = 80;
+      const enemyY = baseY + indexInLevel * spacingY;
+      const enemy = {
+        x: canvas.width - 100,
+        y: enemyY,
+        width: 40,
+        height: 60,
+        color: 'red',
+        speed: 1 + levelIndex * 0.3,
+        bullets: [],
+        hp: 3 + levelIndex,      // enemy HP increases with level
+        maxHp: 3 + levelIndex,
+        direction: 'left',
+        lastShotTime: 0,
+        hitFlashTime: 0
+      };
+      return enemy;
+    }
+
+    function spawnLevel(levelIndex) {
+      enemies = [];
+      const enemyCount = Math.min(3 + levelIndex - 1, 6); // up to 6 enemies
+      for (let i = 0; i < enemyCount; i++) {
+        enemies.push(createEnemy(levelIndex, i));
+      }
     }
 
     function moveEntity(entity, dir) {
@@ -117,108 +214,347 @@
       if (dir === 'down'  && entity.y + entity.height < canvas.height) entity.y += entity.speed;
     }
 
-    function shootBullet(shooter, target) {
+    function moveEnemy(enemy) {
+      // Horizontal back-and-forth
+      enemy.x += enemy.direction === 'left' ? -enemy.speed : enemy.speed;
+      if (enemy.x <= 0 || enemy.x + enemy.width >= canvas.width) {
+        enemy.direction = enemy.direction === 'left' ? 'right' : 'left';
+      }
+      // Small random vertical movement
+      const r = Math.random();
+      if (r < 0.25 && enemy.y > 0) enemy.y -= enemy.speed;
+      else if (r < 0.5 && enemy.y + enemy.height < canvas.height) enemy.y += enemy.speed;
+    }
+
+    function rectsOverlap(a, b) {
+      return (
+        a.x < b.x + b.width &&
+        a.x + a.width > b.x &&
+        a.y < b.y + b.height &&
+        a.y + a.height > b.y
+      );
+    }
+
+    // Shooting functions with upgrades ONLY on player
+    function shootFromPlayer() {
       const now = Date.now();
-      if (shooter === stickman && now - lastShotTime < 500 - fireRateLevel * 75) return;
-      lastShotTime = now;
-      const angle = Math.atan2(target.y - shooter.y, target.x - shooter.x);
-      shooter.bullets.push({
-        x: shooter.x + shooter.width / 2,
-        y: shooter.y + shooter.height / 2,
-        width: 8 + bulletSizeLevel * 2,
+      const baseCooldown = 500; // ms
+      const cooldown = baseCooldown - fireRateLevel * 75; // faster when upgraded
+      if (now - player.lastShotTime < cooldown) return;
+      if (enemies.length === 0) return; // nothing to shoot
+
+      player.lastShotTime = now;
+
+      // Aim at the nearest enemy
+      let target = enemies[0];
+      let minDist = Infinity;
+      for (const enemy of enemies) {
+        const dx = (enemy.x + enemy.width / 2) - (player.x + player.width / 2);
+        const dy = (enemy.y + enemy.height / 2) - (player.y + player.height / 2);
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < minDist) {
+          minDist = dist;
+          target = enemy;
+        }
+      }
+
+      const angle = Math.atan2(
+        target.y + target.height / 2 - (player.y + player.height / 2),
+        target.x + target.width / 2 - (player.x + player.width / 2)
+      );
+
+      player.bullets.push({
+        x: player.x + player.width / 2,
+        y: player.y + player.height / 2,
+        width: 8 + bulletSizeLevel * 2, // bigger with upgrades
         height: 5 + bulletSizeLevel,
-        dx: Math.cos(angle) * 5,
-        dy: Math.sin(angle) * 5
+        dx: Math.cos(angle) * 6,
+        dy: Math.sin(angle) * 6,
+        damage: 1 + bulletSizeLevel   // more damage with size
+      });
+
+      playBeep(600, 80);
+    }
+
+    function shootFromEnemy(enemy) {
+      const now = Date.now();
+      const cooldown = 900; // fixed, does NOT change with player upgrades
+      if (now - enemy.lastShotTime < cooldown) return;
+      enemy.lastShotTime = now;
+
+      const angle = Math.atan2(
+        player.y + player.height / 2 - (enemy.y + enemy.height / 2),
+        player.x + player.width / 2 - (enemy.x + enemy.width / 2)
+      );
+
+      enemy.bullets.push({
+        x: enemy.x + enemy.width / 2,
+        y: enemy.y + enemy.height / 2,
+        width: 8,   // fixed size
+        height: 5,  // fixed size
+        dx: Math.cos(angle) * 4,
+        dy: Math.sin(angle) * 4,
+        damage: 1
       });
     }
 
-    function drawBullets(bullets, target, shooterType) {
-      bullets.forEach((b, i) => {
-        ctx.fillStyle = shooterType === 'stickman' ? 'blue' : 'black';
+    function drawPlayer() {
+      ctx.save();
+      if (player.hitFlashTime > 0) {
+        ctx.fillStyle = 'yellow';
+        player.hitFlashTime--;
+      } else {
+        ctx.fillStyle = player.color;
+      }
+      ctx.fillRect(player.x, player.y, player.width, player.height);
+      ctx.restore();
+    }
+
+    function drawEnemy(enemy) {
+      ctx.save();
+      if (enemy.hitFlashTime > 0) {
+        ctx.fillStyle = 'orange';
+        enemy.hitFlashTime--;
+      } else {
+        ctx.fillStyle = enemy.color;
+      }
+      ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+
+      // Draw enemy HP bar
+      const barWidth = enemy.width;
+      const barHeight = 6;
+      const hpRatio = enemy.hp / enemy.maxHp;
+      ctx.fillStyle = 'black';
+      ctx.fillRect(enemy.x, enemy.y - 10, barWidth, barHeight);
+      ctx.fillStyle = 'lime';
+      ctx.fillRect(enemy.x, enemy.y - 10, barWidth * hpRatio, barHeight);
+      ctx.restore();
+    }
+
+    function drawBulletsForPlayer() {
+      for (let i = player.bullets.length - 1; i >= 0; i--) {
+        const b = player.bullets[i];
+        b.x += b.dx;
+        b.y += b.dy;
+        ctx.fillStyle = 'blue';
         ctx.fillRect(b.x, b.y, b.width, b.height);
-        b.x += b.dx; b.y += b.dy;
-        // collision
-        if (b.x < target.x + target.width && b.x + b.width > target.x &&
-            b.y < target.y + target.height && b.y + b.height > target.y) {
-          if (shooterType === 'stickman') {
-            score += 10; money += 10; updateUI(); resetGame(); startGame();
-          } else {
-            updateStatus('You got hit! Game Over.');
-            resetGame(); setTimeout(startGame, 2000);
+
+        // Hit enemies
+        let hit = false;
+        for (const enemy of enemies) {
+          if (rectsOverlap(b, enemy)) {
+            enemy.hp -= b.damage;
+            enemy.hitFlashTime = 5;
+            hit = true;
+            playBeep(300, 80);
+            if (enemy.hp <= 0) {
+              score += 10;
+              money += 10;
+            }
+            break;
           }
         }
-        // off screen
-        if (b.x < 0 || b.x > canvas.width || b.y < 0 || b.y > canvas.height) bullets.splice(i, 1);
-      });
+        // Remove dead enemies
+        enemies = enemies.filter(e => e.hp > 0);
+
+        // Remove bullet if hit or off screen
+        if (
+          hit ||
+          b.x < 0 || b.x > canvas.width ||
+          b.y < 0 || b.y > canvas.height
+        ) {
+          player.bullets.splice(i, 1);
+        }
+      }
     }
 
-    function updateUI() {
-      scoreDisplay.textContent = `Score / 分数: ${score}`;
-      moneyDisplay.textContent = `Money / 金币: $${money}`;
+    function drawBulletsForEnemies() {
+      for (const enemy of enemies) {
+        for (let i = enemy.bullets.length - 1; i >= 0; i--) {
+          const b = enemy.bullets[i];
+          b.x += b.dx;
+          b.y += b.dy;
+          ctx.fillStyle = 'black';
+          ctx.fillRect(b.x, b.y, b.width, b.height);
+
+          if (rectsOverlap(b, player)) {
+            enemy.bullets.splice(i, 1);
+            player.hp -= b.damage;
+            player.hitFlashTime = 5;
+            playBeep(200, 120);
+            if (player.hp <= 0) {
+              gameOver();
+              return;
+            }
+          } else if (
+            b.x < 0 || b.x > canvas.width ||
+            b.y < 0 || b.y > canvas.height
+          ) {
+            enemy.bullets.splice(i, 1);
+          }
+        }
+      }
     }
 
-    function updateStatus(msg) {
-      const zh = zhMap[msg] || '';
-      statusMessage.innerHTML = `${msg} ${zh ? `<span class="zh">（${zh}）</span>` : ''}`;
+    function gameOver() {
+      isRunning = false;
+      isPaused = false;
+      startButton.style.display = 'inline-block';
+      updateStatus('You were defeated. Game Over.');
+      // Reset everything for a new run
+      level = 1;
+      spawnLevel(level);
+      score = 0;
+      money = 0;
+      bulletSizeLevel = 1;
+      fireRateLevel = 1;
+      resetPlayer();
+      enemies.forEach(e => e.bullets = []);
+      updateUI();
     }
 
-    function resetGame() {
-      isGameRunning = false;
-      stickman.x = 50; stickman.y = 300; stickman.bullets = [];
-      badGuy.x = 500;  badGuy.y = 300;  badGuy.bullets = [];
+    function nextLevel() {
+      updateStatus('Level cleared!');
+      level++;
+      spawnLevel(level);
+      resetPlayer();
+      updateUI();
     }
 
-    function gameLoop() {
-      if (!isGameRunning) return;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawStickman(); drawBadGuy(); moveBadGuy();
-      drawBullets(stickman.bullets, badGuy, 'stickman');
-      drawBullets(badGuy.bullets, stickman, 'badGuy');
-      if (Math.random() < 0.02) shootBullet(badGuy, stickman);
-      if (isShooting) shootBullet(stickman, badGuy);
-      requestAnimationFrame(gameLoop);
+    function softResetForNewGame() {
+      level = 1;
+      score = 0;
+      money = 0;
+      bulletSizeLevel = 1;
+      fireRateLevel = 1;
+      resetPlayer();
+      spawnLevel(level);
+      updateUI();
     }
 
     function startGame() {
-      if (isGameRunning) return;
-      document.getElementById('startGame').style.display = 'none';
-      isGameRunning = true;
+      // Start or restart game
+      isRunning = true;
+      isPaused = false;
+      startButton.style.display = 'none';
       updateStatus('Game in progress...');
-      gameLoop();
+      softResetForNewGame();
     }
 
+    function togglePause() {
+      if (!isRunning) return;
+      isPaused = !isPaused;
+      if (isPaused) {
+        updateStatus('Paused.');
+      } else {
+        updateStatus('Game in progress...');
+      }
+    }
+
+    // Main loop
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (isRunning && !isPaused) {
+        // If no enemies left, go to next level
+        if (enemies.length === 0) {
+          nextLevel();
+        }
+
+        // Move enemies and maybe shoot
+        for (const enemy of enemies) {
+          moveEnemy(enemy);
+          if (Math.random() < 0.03) {
+            shootFromEnemy(enemy);
+          }
+        }
+
+        // Shooting from player (hold shoot)
+        if (isShooting) {
+          shootFromPlayer();
+        }
+
+        // Draw
+        drawPlayer();
+        enemies.forEach(drawEnemy);
+        drawBulletsForPlayer();
+        drawBulletsForEnemies();
+        updateUI();
+      } else {
+        // Not running or paused: still draw player and enemies quietly
+        drawPlayer();
+        enemies.forEach(drawEnemy);
+      }
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    // Initialize
+    spawnLevel(level);
+    updateUI();
+    updateStatus('Press Start or Space to Play!');
+    requestAnimationFrame(gameLoop);
+
     // Button controls
-    document.getElementById('moveLeft').addEventListener('click', () => moveEntity(stickman, 'left'));
-    document.getElementById('moveRight').addEventListener('click', () => moveEntity(stickman, 'right'));
-    document.getElementById('moveUp').addEventListener('click', () => moveEntity(stickman, 'up'));
-    document.getElementById('moveDown').addEventListener('click', () => moveEntity(stickman, 'down'));
+    document.getElementById('moveLeft').addEventListener('click', () => moveEntity(player, 'left'));
+    document.getElementById('moveRight').addEventListener('click', () => moveEntity(player, 'right'));
+    document.getElementById('moveUp').addEventListener('click', () => moveEntity(player, 'up'));
+    document.getElementById('moveDown').addEventListener('click', () => moveEntity(player, 'down'));
 
-    const shootButton = document.getElementById('shoot');
-    shootButton.addEventListener('mousedown', () => isShooting = true);
-    shootButton.addEventListener('mouseup', () => isShooting = false);
-    shootButton.addEventListener('touchstart', () => isShooting = true);
-    shootButton.addEventListener('touchend', () => isShooting = false);
+    shootButton.addEventListener('mousedown', () => { isShooting = true; });
+    shootButton.addEventListener('mouseup', () => { isShooting = false; });
+    shootButton.addEventListener('mouseleave', () => { isShooting = false; });
+    shootButton.addEventListener('touchstart', (e) => { e.preventDefault(); isShooting = true; }, {passive:false});
+    shootButton.addEventListener('touchend', () => { isShooting = false; });
 
-    document.getElementById('startGame').addEventListener('click', startGame);
+    startButton.addEventListener('click', startGame);
+    pauseButton.addEventListener('click', togglePause);
 
     document.getElementById('upgradeSize').addEventListener('click', () => {
-      if (money >= 20 && bulletSizeLevel < 5) { bulletSizeLevel++; money -= 20; updateUI(); }
+      if (money >= 20 && bulletSizeLevel < 5) {
+        bulletSizeLevel++;
+        money -= 20;
+        updateUI();
+      }
     });
+
     document.getElementById('upgradeRate').addEventListener('click', () => {
-      if (money >= 20 && fireRateLevel < 5) { fireRateLevel++; money -= 20; updateUI(); }
+      if (money >= 20 && fireRateLevel < 5) {
+        fireRateLevel++;
+        money -= 20;
+        updateUI();
+      }
     });
 
-    // Keyboard controls (WASD / Arrows + Space)
+    // Keyboard controls (WASD / Arrows + Space + P)
     document.addEventListener('keydown', (e) => {
-      if (!isGameRunning && (e.code === 'Space' || e.key === ' ')) startGame();
-      if (e.code === 'ArrowLeft'  || e.key.toLowerCase() === 'a') moveEntity(stickman, 'left');
-      if (e.code === 'ArrowRight' || e.key.toLowerCase() === 'd') moveEntity(stickman, 'right');
-      if (e.code === 'ArrowUp'    || e.key.toLowerCase() === 'w') moveEntity(stickman, 'up');
-      if (e.code === 'ArrowDown'  || e.key.toLowerCase() === 's') moveEntity(stickman, 'down');
-      if (e.code === 'Space') isShooting = true;
+      const key = e.key.toLowerCase();
+
+      if (!isRunning && (e.code === 'Space' || key === ' ')) {
+        startGame();
+      }
+
+      if (key === 'p') {
+        togglePause();
+      }
+
+      if (!isRunning || isPaused) return;
+
+      if (e.code === 'ArrowLeft'  || key === 'a') moveEntity(player, 'left');
+      if (e.code === 'ArrowRight' || key === 'd') moveEntity(player, 'right');
+      if (e.code === 'ArrowUp'    || key === 'w') moveEntity(player, 'up');
+      if (e.code === 'ArrowDown'  || key === 's') moveEntity(player, 'down');
+
+      if (e.code === 'Space') {
+        isShooting = true;
+      }
     });
 
-    document.addEventListener('keyup', (e) => { if (e.code === 'Space') isShooting = false; });
+    document.addEventListener('keyup', (e) => {
+      if (e.code === 'Space') {
+        isShooting = false;
+      }
+    });
   </script>
 </body>
 </html>
