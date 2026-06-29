@@ -5,11 +5,22 @@ A collection of interactive games designed for the M5Stack Core2 ESP32 developme
 > [!NOTE]
 > **Co-Creation Project**: This is an open-source educational hobby project. We are **not selling any products or hardware**. All code here is for personal fun and learning.
 
-## 📂 Future Multi-Game Architecture
-To support adding other types of learning games in the future (e.g. math, spelling, puzzles), the repository and the SD card structure are organized into self-contained subfolders per game:
-* `/hanzi/` — Holds the dynamic questions configuration and voice audio files for the Chinese Hanzi learning game.
-* `/math/` (Future) — Will hold configurations for arithmetic quizzes.
-* `/spelling/` (Future) — Will hold spelling cards.
+## 📂 Multi-Game Architecture
+To support multiple standalone games, the project is structured with clean separation:
+* **Hanzi Quest (汉字寻宝)** (`src/hanzi_game.cpp`) — Chinese word pronunciation learning quiz game. Loads dynamic questions configuration and voice audio files from `/hanzi/` on the SD card.
+* **Base Defense** (`src/defense_game.cpp`) — An action arcade defense game. Protect your central base from waves of incoming enemies. Fully offline, smooth double-buffered rendering, audio feedback, vibration on damage, and an upgrade selection screen between waves.
+
+### Game Controls
+
+#### Hanzi Quest:
+* **Touch options**: Tap the card matching the voice/pinyin cue.
+* **Button C**: Return to Home.
+
+#### Base Defense:
+* **Touch screen**: Drag or tap to orbit the defender character around the center base.
+* **Button A**: Special screen-wide blast (3 charges, recharges over time).
+* **Button C**: Return to Home.
+* **Upgrades Screen**: Tap on 1 of the 3 random cards between waves to upgrade your character (Rapid Fire, Big Bullets, Speed Up) or base (Heal +1, Shield, Extra Special).
 
 ---
 

@@ -41,8 +41,10 @@ git diff --check
 ## Audience and tone
 
 - Keep all content, comments, game elements, and responses appropriate, positive, encouraging, and clear.
-- Act as an encouraging coding teacher/guide. Break down technical steps simply and explain what each piece of code does.
-- A parent/guardian may occasionally co-teach or join the workflow. Communicate clearly and avoid overly complex implementation plans when simple guidance is enough.
+- Before any action, ask Andy what he would like to build or learn next, offering simple options if needed.
+- Explain each planned step in plain language before executing, and obtain Andy's explicit confirmation.
+- After completing a coding change, remind Andy to commit and push the changes to GitHub as a backup.
+- A parent/guardian may occasionally co‑teach or join the workflow. Communicate clearly and avoid overly complex implementation plans when simple guidance is enough.
 - If Andy asks a question or makes a request that is unclear or underspecified, ask simple clarifying questions instead of making assumptions.
 
 ## Privacy and confidentiality

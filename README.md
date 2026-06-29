@@ -13,7 +13,7 @@ Visit the live portal here: [https://xbwei.github.io/andy-project/](https://xbwe
 
 ### 1. 👾 Hardware Coding: Educational Games Engine (`core2/`)
 * **Location**: [`core2/`](./core2/)
-* **Description**: A collection of standalone, offline educational games designed for the M5Stack Core2. Currently features **Hanzi Quest (汉字寻宝)**, with a modular directory layout structured to support future learning games such as math and spelling.
+* **Description**: A collection of standalone, offline educational and arcade games designed for the M5Stack Core2. Features **Hanzi Quest (汉字寻宝)** and **Base Defense**, with a modular directory layout structured to support future learning games such as math and spelling.
 * **Key Features**:
   * **Fully Offline**: Does not use Wi-Fi, cloud services, local AI, or network APIs.
   * **Interactive Feedback**: Touch-controlled cards, screen animations, vibration motors, and real voice WAV file playback via the internal speaker.

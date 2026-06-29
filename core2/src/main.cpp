@@ -3,12 +3,14 @@
 #include <SD.h>
 
 #include "hanzi_game.h"
+#include "defense_game.h"
 
 namespace {
 
 enum class AppMode {
   Home,
   Hanzi,
+  Defense,
 };
 
 AppMode appMode = AppMode::Home;
@@ -52,23 +54,35 @@ void showHome() {
   M5.Display.fillScreen(background);
   drawHeader();
 
-  drawCentered("LOCAL GAME", 160, 52, 2, cyan);
-  drawCentered("Works offline - no Wi-Fi or AI", 160, 77, 1, WHITE);
+  drawCentered("GAMES", 160, 48, 2, cyan);
 
-  M5.Display.fillRoundRect(63, 101, 200, 75, 10, BLACK);
-  M5.Display.fillRoundRect(59, 97, 200, 75, 10, panel);
-  M5.Display.drawRoundRect(59, 97, 200, 75, 10, WHITE);
-  drawCentered("HANZI QUEST", 159, 123, 2, WHITE);
-  drawCentered("Tap to play", 159, 151, 1, WHITE);
+  // Card 1: Hanzi Quest
+  M5.Display.fillRoundRect(24, 68, 272, 48, 8, BLACK);
+  M5.Display.fillRoundRect(22, 66, 272, 48, 8, panel);
+  M5.Display.drawRoundRect(22, 66, 272, 48, 8, WHITE);
+  drawCentered("HANZI QUEST", 158, 82, 2, WHITE);
+  drawCentered("Tap to play", 158, 100, 1, WHITE);
+
+  // Card 2: Base Defense
+  const uint16_t defPanel = M5.Display.color565(160, 55, 35);
+  M5.Display.fillRoundRect(24, 126, 272, 48, 8, BLACK);
+  M5.Display.fillRoundRect(22, 124, 272, 48, 8, defPanel);
+  M5.Display.drawRoundRect(22, 124, 272, 48, 8, WHITE);
+  drawCentered("BASE DEFENSE", 158, 140, 2, WHITE);
+  drawCentered("Tap to play", 158, 158, 1, WHITE);
 
   M5.Display.fillRect(0, 205, 320, 35, M5.Display.color565(24, 35, 64));
-  drawCentered("A: PLAY", 63, 222, 1, WHITE);
-  drawCentered("Touch the game card", 207, 222, 1, WHITE);
+  drawCentered("Touch a game card to play!", 160, 222, 1, WHITE);
 }
 
-void startGame() {
+void startHanzi() {
   appMode = AppMode::Hanzi;
   HanziGame::start();
+}
+
+void startDefense() {
+  appMode = AppMode::Defense;
+  DefenseGame::start();
 }
 
 void handleSerialTransfer() {
@@ -162,17 +176,22 @@ void loop() {
   M5.update();
 
   if (appMode == AppMode::Home) {
-    bool playRequested = M5.BtnA.wasPressed();
     if (M5.Touch.getCount() > 0) {
       const auto& touch = M5.Touch.getDetail();
-      playRequested = playRequested ||
-        (touch.wasPressed() && pointInside(touch.x, touch.y, 59, 97, 200, 75));
-    }
-    if (playRequested) {
-      startGame();
+      if (touch.wasPressed()) {
+        if (pointInside(touch.x, touch.y, 22, 66, 272, 48)) {
+          startHanzi();
+        } else if (pointInside(touch.x, touch.y, 22, 124, 272, 48)) {
+          startDefense();
+        }
+      }
     }
   } else if (appMode == AppMode::Hanzi) {
     if (M5.BtnC.wasPressed() || HanziGame::update() == HanziGameAction::Home) {
+      showHome();
+    }
+  } else if (appMode == AppMode::Defense) {
+    if (M5.BtnC.wasPressed() || DefenseGame::update() == DefenseGameAction::Home) {
       showHome();
     }
   }
