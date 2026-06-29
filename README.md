@@ -11,14 +11,14 @@ Visit the live portal here: [https://xbwei.github.io/andy-project/](https://xbwe
 
 ## Projects Directory
 
-### 1. 👾 Hardware Coding: Hanzi Quest (`core2/`)
+### 1. 👾 Hardware Coding: Educational Games Engine (`core2/`)
 * **Location**: [`core2/`](./core2/)
-* **Description**: A standalone Chinese character (Hanzi) quest game designed for the M5Stack Core2.
+* **Description**: A collection of standalone, offline educational games designed for the M5Stack Core2. Currently features **Hanzi Quest (汉字寻宝)**, with a modular directory layout structured to support future learning games (such as math and spelling).
 * **Key Features**:
   * **Fully Offline**: Does not use Wi-Fi, cloud services, local AI, or network APIs.
   * **Interactive Feedback**: Touch-controlled cards, screen animations, vibration motors, and real voice WAV file playback via the internal speaker.
-  * **Dynamic Vocabulary System**: Loads questions dynamically from `questions.csv`.
-  * **Zero-Touch SD Card Update**: Parents can edit [`questions.csv`](./core2/data/questions.csv) directly on GitHub. Compiling and flashing the new firmware automatically embeds the CSV and overwrites the SD card copy on boot—meaning you never need to physically swap out the microSD card.
+  * **Dynamic Configurations per Game**: Loads configurations (like Hanzi questions) from the game's subdirectory.
+  * **Zero-Touch SD Card Update**: Parents can edit files (e.g. [`questions.csv`](./core2/data/hanzi/questions.csv)) directly on GitHub. Compiling and flashing the new firmware automatically embeds the CSV and overwrites the SD card copy on boot—meaning you never need to physically swap out the microSD card.
 
 ### 2. 💵 Cash Drops Storybook
 * **Location**: [`cash-drops/`](./cash-drops/)
