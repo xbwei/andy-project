@@ -29,7 +29,28 @@ To run this project, you will need the following hardware:
 
 ## 🚀 Deployment Guide
 
-### Option A: Manual Deployment (No AI Assistant)
+### Option A: Assisted Deployment (Using AI Coding Assistants / Engines) [RECOMMENDED]
+
+If you are developing or deploying with the help of an AI Coding Assistant or Coding Engine (such as Google Antigravity, Anthropic Claude Code, GitHub Copilot, OpenAI Codex, or others):
+
+> [!WARNING]
+> **Accuracy is not guaranteed**: AI coding assistants may generate code errors, introduce bugs, or hallucinate syntax. Always review proposed plans, inspect generated code changes, and verify before deploying onto physical hardware.
+
+1. **Connect the Device**:
+   * Connect your M5Stack Core2 to your PC via USB-C.
+2. **Command the Assistant**:
+   * Simply ask your AI assistant in chat to compile the PlatformIO project and sync the assets (e.g., *"Sync my local vocabulary and compile the firmware"*).
+   * The AI coding assistant can run the build, flash the firmware to your device, and invoke the Python synchronizer script to transfer files to the SD card.
+3. **Manual Synchronizer Utility**:
+   * You can manually trigger the USB sync script from your computer's terminal:
+     ```bash
+     python sync_assets.py
+     ```
+   * Ensure your private questions are saved in `core2/data/hanzi/questions.csv` and audio files in `core2/data/hanzi/` before running.
+
+---
+
+### Option B: Manual Deployment (No AI Assistant)
 
 If you are a standard developer compiling this project manually:
 
@@ -48,24 +69,6 @@ If you are a standard developer compiling this project manually:
    * Connect the M5Stack Core2 to your PC via the USB-C cable.
    * Click the **PlatformIO: Upload** arrow icon in the bottom status bar (or run `pio run -t upload` in the terminal).
    * The device will reboot and launch the game.
-
----
-
-### Option B: Assisted Deployment (Using AI Coding Assistants / Engines)
-
-If you are developing or deploying with the help of an AI Coding Assistant or Coding Engine (such as Google Antigravity, Anthropic Claude Code, GitHub Copilot, OpenAI Codex, or others):
-
-1. **Connect the Device**:
-   * Connect your M5Stack Core2 to your PC via USB-C.
-2. **Command the Assistant**:
-   * Simply ask your AI assistant in chat to compile the PlatformIO project and sync the assets (e.g. *"Sync my local vocabulary and compile the firmware"*).
-   * The AI coding assistant can run the build, flash the firmware to your device, and invoke the Python synchronizer script to transfer files to the SD card.
-3. **Manual Synchronizer Utility**:
-   * You can manually trigger the USB sync script from your computer's terminal:
-     ```bash
-     python sync_assets.py
-     ```
-   * Ensure your private questions are saved in `core2/data/hanzi/questions.csv` and audio files in `core2/data/hanzi/` before running.
 
 ---
 
