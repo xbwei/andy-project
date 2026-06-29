@@ -1,17 +1,23 @@
 #include "hanzi_game.h"
 
 #include <M5Unified.h>
+#include <SD.h>
+#include <vector>
+#include <string>
+
+extern const uint8_t questions_csv_start[] asm("_binary_data_questions_csv_start");
+extern const uint8_t questions_csv_end[]   asm("_binary_data_questions_csv_end");
 
 namespace {  // Local game state
 
-struct Question {
+struct StaticQuestion {
   const char* hanzi;
   const char* pinyin;
   const char* choices[3];
   uint8_t correctChoice;
 };
 
-constexpr Question QUESTIONS[] = {
+constexpr StaticQuestion DEFAULT_QUESTIONS[] = {
   {"山", "shan", {"mountain", "water", "tree"}, 0},
   {"水", "shui", {"fire", "water", "moon"}, 1},
   {"火", "huo", {"person", "fire", "sun"}, 1},
@@ -24,7 +30,16 @@ constexpr Question QUESTIONS[] = {
   {"小", "xiao", {"mountain", "small", "person"}, 1},
 };
 
-constexpr size_t QUESTION_COUNT = sizeof(QUESTIONS) / sizeof(QUESTIONS[0]);
+constexpr size_t DEFAULT_QUESTION_COUNT = sizeof(DEFAULT_QUESTIONS) / sizeof(DEFAULT_QUESTIONS[0]);
+
+struct Question {
+  std::string hanzi;
+  std::string pinyin;
+  std::string choices[3];
+  uint8_t correctChoice;
+};
+
+std::vector<Question> questionsList;
 constexpr int OPTION_Y = 145;
 constexpr int OPTION_W = 96;
 constexpr int OPTION_H = 50;
@@ -83,7 +98,7 @@ void drawTopBar() {
     sizeof(progress),
     "%u/%u",
     static_cast<unsigned>(currentQuestion + 1),
-    static_cast<unsigned>(QUESTION_COUNT)
+    static_cast<unsigned>(questionsList.size())
   );
   drawCentered(progress, 164, 15, 1, cyanColor);
 
@@ -93,7 +108,7 @@ void drawTopBar() {
 }
 
 void drawOption(size_t index, uint16_t fillColor = 0, uint16_t borderColor = 0) {
-  const Question& question = QUESTIONS[currentQuestion];
+  const Question& question = questionsList[currentQuestion];
   int x = OPTION_GAP + static_cast<int>(index) * (OPTION_W + OPTION_GAP);
   uint16_t fill = fillColor == 0 ? panelColor : fillColor;
   uint16_t border = borderColor == 0 ? cyanColor : borderColor;
@@ -101,7 +116,7 @@ void drawOption(size_t index, uint16_t fillColor = 0, uint16_t borderColor = 0) 
   M5.Display.fillRoundRect(x + 3, OPTION_Y + 4, OPTION_W, OPTION_H, 7, panelShadowColor);
   M5.Display.fillRoundRect(x, OPTION_Y, OPTION_W, OPTION_H, 7, fill);
   M5.Display.drawRoundRect(x, OPTION_Y, OPTION_W, OPTION_H, 7, border);
-  drawCentered(question.choices[index], x + OPTION_W / 2, OPTION_Y + OPTION_H / 2, 1, WHITE);
+  drawCentered(question.choices[index].c_str(), x + OPTION_W / 2, OPTION_Y + OPTION_H / 2, 1, WHITE);
 }
 
 void drawQuestion() {
@@ -109,7 +124,7 @@ void drawQuestion() {
   drawTopBar();
   drawPixelDecor();
 
-  const Question& question = QUESTIONS[currentQuestion];
+  const Question& question = questionsList[currentQuestion];
 
   M5.Display.fillRoundRect(112, 48, 104, 84, 9, panelShadowColor);
   M5.Display.fillRoundRect(108, 44, 104, 84, 9, panelColor);
@@ -119,7 +134,7 @@ void drawQuestion() {
   M5.Display.setTextSize(3);
   M5.Display.setTextColor(WHITE);
   M5.Display.setTextDatum(middle_center);
-  M5.Display.drawString(question.hanzi, 160, 84);
+  M5.Display.drawString(question.hanzi.c_str(), 160, 84);
   M5.Display.setTextDatum(top_left);
 
   drawCentered("Tap the meaning", 160, 136, 1, cyanColor);
@@ -153,6 +168,234 @@ void drawCelebrationPixels() {
   }
 }
 
+std::vector<std::string> split(const std::string& s, char delimiter) {
+  std::vector<std::string> tokens;
+  size_t start = 0;
+  size_t end = s.find(delimiter);
+  while (end != std::string::npos) {
+    tokens.push_back(s.substr(start, end - start));
+    start = end + 1;
+    end = s.find(delimiter, start);
+  }
+  tokens.push_back(s.substr(start));
+  if (!tokens.empty() && !tokens.back().empty() && tokens.back().back() == '\r') {
+    tokens.back().pop_back();
+  }
+  return tokens;
+}
+
+bool loadQuestionsFromSD() {
+  if (!SD.exists("/hanzi/questions.csv")) {
+    Serial.println("questions.csv not found on SD card.");
+    return false;
+  }
+
+  File file = SD.open("/hanzi/questions.csv");
+  if (!file) {
+    Serial.println("Failed to open questions.csv on SD card.");
+    return false;
+  }
+
+  questionsList.clear();
+  while (file.available()) {
+    String lineStr = file.readStringUntil('\n');
+    std::string line(lineStr.c_str());
+    if (line.empty() || line == "\r") {
+      continue;
+    }
+    
+    std::vector<std::string> parts = split(line, ',');
+    if (parts.size() >= 6) {
+      Question q;
+      q.hanzi = parts[0];
+      q.pinyin = parts[1];
+      q.choices[0] = parts[2];
+      q.choices[1] = parts[3];
+      q.choices[2] = parts[4];
+      q.correctChoice = static_cast<uint8_t>(atoi(parts[5].c_str()));
+      questionsList.push_back(q);
+    }
+  }
+
+  file.close();
+  
+  if (questionsList.empty()) {
+    Serial.println("Warning: loaded 0 questions from SD card questions.csv.");
+    return false;
+  }
+  
+  Serial.printf("Successfully loaded %u questions from SD card!\n", static_cast<unsigned>(questionsList.size()));
+  return true;
+}
+
+bool loadQuestionsFromBuffer(const uint8_t* buffer, size_t size) {
+  questionsList.clear();
+  std::string content((const char*)buffer, size);
+  
+  size_t start = 0;
+  size_t end = content.find('\n');
+  while (end != std::string::npos) {
+    std::string line = content.substr(start, end - start);
+    if (!line.empty() && line.back() == '\r') {
+      line.pop_back();
+    }
+    if (!line.empty()) {
+      std::vector<std::string> parts = split(line, ',');
+      if (parts.size() >= 6) {
+        Question q;
+        q.hanzi = parts[0];
+        q.pinyin = parts[1];
+        q.choices[0] = parts[2];
+        q.choices[1] = parts[3];
+        q.choices[2] = parts[4];
+        q.correctChoice = static_cast<uint8_t>(atoi(parts[5].c_str()));
+        questionsList.push_back(q);
+      }
+    }
+    start = end + 1;
+    end = content.find('\n', start);
+  }
+  
+  if (start < content.size()) {
+    std::string line = content.substr(start);
+    if (!line.empty() && line.back() == '\r') {
+      line.pop_back();
+    }
+    if (!line.empty()) {
+      std::vector<std::string> parts = split(line, ',');
+      if (parts.size() >= 6) {
+        Question q;
+        q.hanzi = parts[0];
+        q.pinyin = parts[1];
+        q.choices[0] = parts[2];
+        q.choices[1] = parts[3];
+        q.choices[2] = parts[4];
+        q.correctChoice = static_cast<uint8_t>(atoi(parts[5].c_str()));
+        questionsList.push_back(q);
+      }
+    }
+  }
+
+  if (questionsList.empty()) {
+    Serial.println("Warning: parsed 0 questions from embedded memory buffer.");
+    return false;
+  }
+
+  Serial.printf("Successfully loaded %u questions from embedded flash memory!\n", static_cast<unsigned>(questionsList.size()));
+  return true;
+}
+
+void writeDefaultQuestionsToSD() {
+  if (!SD.exists("/hanzi")) {
+    SD.mkdir("/hanzi");
+  }
+
+  File file = SD.open("/hanzi/questions.csv", FILE_WRITE);
+  if (!file) {
+    Serial.println("Failed to open questions.csv on SD card for writing.");
+    return;
+  }
+
+  size_t csvSize = questions_csv_end - questions_csv_start;
+  size_t written = file.write(questions_csv_start, csvSize);
+  file.close();
+
+  if (written == csvSize) {
+    Serial.println("Successfully synchronized questions.csv from internal flash to SD card.");
+  } else {
+    Serial.printf("Warning: Only wrote %u of %u bytes of questions.csv to SD card.\n", written, csvSize);
+  }
+}
+
+void loadVocabulary() {
+  questionsList.clear();
+  bool success = false;
+  
+  if (SD.cardType() != CARD_NONE) {
+    Serial.println("SD Card found. Syncing questions from internal flash...");
+    writeDefaultQuestionsToSD(); // Always overwrite SD card with the newer flashed version on boot
+    success = loadQuestionsFromSD();
+  } else {
+    Serial.println("SD Card not inserted. Loading from internal flash memory directly.");
+  }
+
+  if (!success) {
+    size_t csvSize = questions_csv_end - questions_csv_start;
+    success = loadQuestionsFromBuffer(questions_csv_start, csvSize);
+  }
+
+  if (!success) {
+    Serial.println("Absolute fallback: Loading static compiler questions...");
+    questionsList.clear();
+    for (size_t i = 0; i < DEFAULT_QUESTION_COUNT; ++i) {
+      const auto& q = DEFAULT_QUESTIONS[i];
+      Question dynamicQ;
+      dynamicQ.hanzi = q.hanzi;
+      dynamicQ.pinyin = q.pinyin;
+      dynamicQ.choices[0] = q.choices[0];
+      dynamicQ.choices[1] = q.choices[1];
+      dynamicQ.choices[2] = q.choices[2];
+      dynamicQ.correctChoice = q.correctChoice;
+      questionsList.push_back(dynamicQ);
+    }
+  }
+}
+
+enum class PlayVoiceResult {
+  NotFound,
+  Played,
+  HomeRequested
+};
+
+PlayVoiceResult playVoice(const char* pinyin) {
+  char path[64];
+  snprintf(path, sizeof(path), "/hanzi/%s.wav", pinyin);
+
+  if (!SD.exists(path)) {
+    Serial.printf("Voice file not found on SD: %s\n", path);
+    return PlayVoiceResult::NotFound;
+  }
+
+  File file = SD.open(path);
+  if (!file) {
+    Serial.printf("Failed to open voice file: %s\n", path);
+    return PlayVoiceResult::NotFound;
+  }
+
+  size_t fileSize = file.size();
+  Serial.printf("Reading voice file from SD: %s (%u bytes)\n", path, static_cast<unsigned>(fileSize));
+
+  uint8_t* wavBuffer = (uint8_t*)malloc(fileSize);
+  if (!wavBuffer) {
+    Serial.println("Error: Failed to allocate memory for WAV buffer!");
+    file.close();
+    return PlayVoiceResult::NotFound;
+  }
+
+  size_t bytesRead = file.read(wavBuffer, fileSize);
+  file.close();
+
+  if (bytesRead < fileSize) {
+    Serial.printf("Warning: Only read %u of %u bytes\n", static_cast<unsigned>(bytesRead), static_cast<unsigned>(fileSize));
+  }
+
+  M5.Speaker.playWav(wavBuffer, bytesRead);
+
+  PlayVoiceResult result = PlayVoiceResult::Played;
+  while (M5.Speaker.isPlaying()) {
+    M5.update();
+    if (M5.BtnC.wasPressed()) {
+      M5.Speaker.stop();
+      result = PlayVoiceResult::HomeRequested;
+      break;
+    }
+    delay(10);
+  }
+
+  free(wavBuffer);
+  return result;
+}
+
 bool waitForHomeRequest(unsigned long durationMs) {
   unsigned long startedAt = millis();
   while (millis() - startedAt < durationMs) {
@@ -180,32 +423,45 @@ bool correctFeedback(size_t choice) {
     detail,
     sizeof(detail),
     "%s = %s   +%d",
-    QUESTIONS[currentQuestion].pinyin,
-    QUESTIONS[currentQuestion].choices[QUESTIONS[currentQuestion].correctChoice],
+    questionsList[currentQuestion].pinyin.c_str(),
+    questionsList[currentQuestion].choices[questionsList[currentQuestion].correctChoice].c_str(),
     earned
   );
   drawFeedbackBanner("NICE!", detail, greenColor);
   drawCelebrationPixels();
 
   M5.Power.setVibration(180);
-  M5.Speaker.tone(660, 90);
-  if (waitForHomeRequest(90)) {
+  PlayVoiceResult pvRes = playVoice(questionsList[currentQuestion].pinyin.c_str());
+  if (pvRes == PlayVoiceResult::HomeRequested) {
     M5.Power.setVibration(0);
     return true;
   }
-  M5.Speaker.tone(880, 130);
-  if (waitForHomeRequest(50)) {
-    M5.Power.setVibration(0);
-    return true;
+
+  if (pvRes == PlayVoiceResult::NotFound) {
+    M5.Speaker.tone(660, 90);
+    if (waitForHomeRequest(90)) {
+      M5.Power.setVibration(0);
+      return true;
+    }
+    M5.Speaker.tone(880, 130);
+    if (waitForHomeRequest(50)) {
+      M5.Power.setVibration(0);
+      return true;
+    }
+  } else {
+    if (waitForHomeRequest(100)) {
+      M5.Power.setVibration(0);
+      return true;
+    }
   }
   M5.Power.setVibration(0);
-  if (waitForHomeRequest(500)) {
+  if (waitForHomeRequest(400)) {
     return true;
   }
 
   ++currentQuestion;
   missedCurrentQuestion = false;
-  if (currentQuestion >= QUESTION_COUNT) {
+  if (currentQuestion >= questionsList.size()) {
     finished = true;
   } else {
     drawQuestion();
@@ -291,6 +547,7 @@ void start() {
   missedCurrentQuestion = false;
   finished = false;
   stateStartedAt = millis();
+  loadVocabulary();
   drawQuestion();
 }
 
@@ -317,11 +574,18 @@ HanziGameAction update() {
     return HanziGameAction::None;
   }
 
+  if (pointInside(touch.x, touch.y, 108, 44, 104, 84)) {
+    if (playVoice(questionsList[currentQuestion].pinyin.c_str()) == PlayVoiceResult::HomeRequested) {
+      return HanziGameAction::Home;
+    }
+    return HanziGameAction::None;
+  }
+
   if (touch.y >= OPTION_Y && touch.y < OPTION_Y + OPTION_H) {
     for (size_t i = 0; i < 3; ++i) {
       int x = OPTION_GAP + static_cast<int>(i) * (OPTION_W + OPTION_GAP);
       if (pointInside(touch.x, touch.y, x, OPTION_Y, OPTION_W, OPTION_H)) {
-        if (i == QUESTIONS[currentQuestion].correctChoice) {
+        if (i == questionsList[currentQuestion].correctChoice) {
           if (correctFeedback(i)) {
             return HanziGameAction::Home;
           }

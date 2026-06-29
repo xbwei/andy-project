@@ -1,3 +1,14 @@
 .pio/
 .vscode/
 .DS_Store
+
+# Local offline game save files and scores
+save.json
+progress.json
+progress.txt
+scores.txt
+*.save
+
+# Media assets (wav/mp3)
+*.wav
+*.mp3

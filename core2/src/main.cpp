@@ -1,4 +1,6 @@
 #include <M5Unified.h>
+#include <SPI.h>
+#include <SD.h>
 
 #include "hanzi_game.h"
 
@@ -75,6 +77,13 @@ void setup() {
   auto config = M5.config();
   config.serial_baudrate = 115200;
   M5.begin(config);
+
+  // Initialize micro SD card (Core2 uses CS GPIO 4)
+  if (!SD.begin(GPIO_NUM_4, SPI, 25000000)) {
+    Serial.println("SD Card mount failed! Game will play only in beep/buzzer mode.");
+  } else {
+    Serial.println("SD Card mounted successfully!");
+  }
 
   M5.Speaker.begin();
   M5.Speaker.setVolume(160);
