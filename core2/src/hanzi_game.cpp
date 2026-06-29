@@ -5,8 +5,8 @@
 #include <vector>
 #include <string>
 
-extern const uint8_t questions_csv_start[] asm("_binary_data_questions_csv_start");
-extern const uint8_t questions_csv_end[]   asm("_binary_data_questions_csv_end");
+extern const uint8_t questions_csv_start[] asm("_binary_data_hanzi_questions_csv_start");
+extern const uint8_t questions_csv_end[]   asm("_binary_data_hanzi_questions_csv_end");
 
 namespace {  // Local game state
 

@@ -2,6 +2,9 @@
 
 Welcome to Andy's personal repository of coding, writing, and creative projects!
 
+> [!NOTE]
+> **Co-Creation Project**: This is a personal, open-source educational hobby repository co-created by an 8-year-old boy (Andy) and his father. We are **not selling any products or hardware**. All designs, scripts, and firmware code here are purely for learning, playing, and sharing!
+
 Visit the live portal here: [https://xbwei.github.io/andy-project/](https://xbwei.github.io/andy-project/)
 
 ---

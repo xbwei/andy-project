@@ -84,14 +84,14 @@ def main():
         return 1
         
     # 1. Sync questions.csv
-    csv_path = os.path.join(DATA_DIR, "questions.csv")
+    csv_path = os.path.join(DATA_DIR, "hanzi", "questions.csv")
     if os.path.exists(csv_path):
         if not sync_file(ser, csv_path, "questions.csv"):
             print("Failed to sync questions.csv. Aborting.")
             ser.close()
             return 1
     else:
-        print("Warning: questions.csv not found in data folder!")
+        print("Warning: questions.csv not found in data/hanzi folder!")
         
     # 2. Sync all .wav files in data/hanzi
     wav_files = glob.glob(os.path.join(DATA_DIR, "hanzi", "*.wav"))

@@ -14,4 +14,4 @@ scores.txt
 *.mp3
 
 # Local private vocabulary file containing family names
-data/questions.csv
+data/hanzi/questions.csv

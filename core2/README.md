@@ -1,6 +1,15 @@
-# M5Stack Core2: Hanzi Quest (汉字寻宝)
+# M5Stack Core2: Educational Coding Project
 
-A standalone, offline Chinese character learning game designed for the M5Stack Core2 ESP32 development kit. It features custom touch controls, speaker audio playback, vibration feedback, and a dynamic CSV-based question system.
+A collection of interactive games designed for the M5Stack Core2 ESP32 development kit. The games feature offline touch controls, real audio playback, and vibration feedback.
+
+> [!NOTE]
+> **Co-Creation Project**: This is a personal, open-source educational hobby repository co-created by an 8-year-old boy (Andy) and his father. We are **not selling any products or hardware**. All code here is purely for personal fun and learning.
+
+## 📂 Future Multi-Game Architecture
+To support adding other types of learning games in the future (e.g. math, spelling, puzzles), the repository and the SD card structure are organized into self-contained subfolders per game:
+* `/hanzi/` — Holds the dynamic questions configuration and voice audio files for the Chinese Hanzi learning game.
+* `/math/` (Future) — Will hold configurations for arithmetic quizzes.
+* `/spelling/` (Future) — Will hold spelling cards.
 
 ---
 
@@ -30,7 +39,7 @@ If you are a standard developer compiling this project manually:
 2. **Open the Project**:
    * Open the `core2` folder in VS Code.
 3. **Prepare the SD Card**:
-   * Copy the public template [`data/questions.csv.template`](./data/questions.csv.template) and rename it to `questions.csv`.
+   * Copy the public template [`data/hanzi/questions.csv.template`](./data/hanzi/questions.csv.template) and rename it to `questions.csv`.
    * Create a folder named `hanzi` in the root of your microSD card.
    * Copy your `questions.csv` into the `hanzi` folder on the card.
    * Put your custom `.wav` voice files (16000Hz, 16-bit, mono PCM WAV format) into the `hanzi` folder on the card, matching the pinyin filenames (e.g. `shan.wav`, `shui.wav`).
@@ -56,7 +65,7 @@ If you are using the Google Gemini Antigravity coding assistant:
      ```bash
      python sync_assets.py
      ```
-   * Ensure your private questions are saved in `core2/data/questions.csv` and audio files in `core2/data/hanzi/` before running.
+   * Ensure your private questions are saved in `core2/data/hanzi/questions.csv` and audio files in `core2/data/hanzi/` before running.
 
 ---
 
