@@ -51,15 +51,15 @@ If you are a standard developer compiling this project manually:
 
 ---
 
-### Option B: Assisted Deployment (Using AI Coding Agent / Antigravity)
+### Option B: Assisted Deployment (Using AI Coding Assistants / Engines)
 
-If you are using the Google Gemini Antigravity coding assistant:
+If you are developing or deploying with the help of an AI Coding Assistant or Coding Engine (such as Google Antigravity, Anthropic Claude Code, GitHub Copilot, OpenAI Codex, or others):
 
 1. **Connect the Device**:
    * Connect your M5Stack Core2 to your PC via USB-C.
-2. **Command the Agent**:
-   * Simply ask the agent in chat: *"Sync my local vocabulary and compile the firmware."*
-   * The agent will build the firmware, upload it, and run the Python synchronization script to transfer all questions and voice assets directly over USB without taking out the SD card.
+2. **Command the Assistant**:
+   * Simply ask your AI assistant in chat to compile the PlatformIO project and sync the assets (e.g. *"Sync my local vocabulary and compile the firmware"*).
+   * The AI coding assistant can run the build, flash the firmware to your device, and invoke the Python synchronizer script to transfer files to the SD card.
 3. **Manual Synchronizer Utility**:
    * You can manually trigger the USB sync script from your computer's terminal:
      ```bash
