@@ -126,6 +126,7 @@ void drawQuestion() {
 
   const Question& question = questionsList[currentQuestion];
 
+  // Draw central card
   M5.Display.fillRoundRect(112, 48, 104, 84, 9, panelShadowColor);
   M5.Display.fillRoundRect(108, 44, 104, 84, 9, panelColor);
   M5.Display.drawRoundRect(108, 44, 104, 84, 9, purpleColor);
@@ -137,16 +138,27 @@ void drawQuestion() {
   M5.Display.drawString(question.hanzi.c_str(), 160, 84);
   M5.Display.setTextDatum(top_left);
 
+  // Draw Sound button next to card
+  M5.Display.fillRoundRect(236, 68, 48, 44, 5, panelShadowColor);
+  M5.Display.fillRoundRect(232, 64, 48, 44, 5, panelColor);
+  M5.Display.drawRoundRect(232, 64, 48, 44, 5, cyanColor);
+  drawCentered("SOUND", 256, 86, 1, WHITE);
+
   drawCentered("Tap the meaning", 160, 136, 1, cyanColor);
   for (size_t i = 0; i < 3; ++i) {
     drawOption(i);
   }
 
+  // Draw bottom bar and EXIT button
   M5.Display.fillRect(0, 205, 320, 35, panelShadowColor);
   char comboText[24];
   snprintf(comboText, sizeof(comboText), "COMBO x%d", streak);
   drawCentered(comboText, 72, 222, 1, orangeColor);
-  drawCentered("C: HOME", 260, 222, 1, WHITE);
+
+  M5.Display.fillRoundRect(220, 209, 80, 26, 5, panelColor);
+  M5.Display.drawRoundRect(220, 209, 80, 26, 5, orangeColor);
+  drawCentered("EXIT", 260, 222, 1, WHITE);
+
   stateStartedAt = millis();
 }
 
@@ -338,6 +350,19 @@ void loadVocabulary() {
       dynamicQ.correctChoice = q.correctChoice;
       questionsList.push_back(dynamicQ);
     }
+  }
+
+  // Shuffle questions to make it random and fun
+  if (questionsList.size() > 1) {
+    for (size_t i = questionsList.size() - 1; i > 0; --i) {
+      size_t j = random(i + 1);
+      std::swap(questionsList[i], questionsList[j]);
+    }
+  }
+
+  // Keep only 10 questions per run
+  if (questionsList.size() > 10) {
+    questionsList.resize(10);
   }
 }
 
@@ -565,6 +590,11 @@ HanziGameAction update() {
     return HanziGameAction::None;
   }
 
+  // EXIT button check (bottom right bar area)
+  if (!finished && pointInside(touch.x, touch.y, 210, 205, 110, 35)) {
+    return HanziGameAction::Home;
+  }
+
   if (finished) {
     if (pointInside(touch.x, touch.y, 23, 145, 126, 48)) {
       start();
@@ -574,7 +604,8 @@ HanziGameAction update() {
     return HanziGameAction::None;
   }
 
-  if (pointInside(touch.x, touch.y, 108, 44, 104, 84)) {
+  // Tapping central card OR the SOUND button plays pronunciation
+  if (pointInside(touch.x, touch.y, 108, 44, 104, 84) || pointInside(touch.x, touch.y, 232, 64, 48, 44)) {
     if (playVoice(questionsList[currentQuestion].pinyin.c_str()) == PlayVoiceResult::HomeRequested) {
       return HanziGameAction::Home;
     }

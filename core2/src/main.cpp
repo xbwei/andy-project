@@ -71,6 +71,68 @@ void startGame() {
   HanziGame::start();
 }
 
+void handleSerialTransfer() {
+  if (Serial.available()) {
+    String cmd = Serial.readStringUntil('\n');
+    if (cmd.startsWith("TRANS:")) {
+      int firstColon = cmd.indexOf(':');
+      int secondColon = cmd.indexOf(':', firstColon + 1);
+      if (firstColon != -1 && secondColon != -1) {
+        String filename = cmd.substring(firstColon + 1, secondColon);
+        long fileSize = cmd.substring(secondColon + 1).toInt();
+        
+        M5.Display.fillScreen(BLACK);
+        drawCentered("FILE SYNC ACTIVE", 160, 80, 2, YELLOW);
+        drawCentered(filename.c_str(), 160, 120, 1, WHITE);
+        
+        Serial.printf("READY:%s\n", filename.c_str());
+        
+        if (!SD.exists("/hanzi")) {
+          SD.mkdir("/hanzi");
+        }
+        String path = "/hanzi/" + filename;
+        File file = SD.open(path, FILE_WRITE);
+        if (!file) {
+          Serial.println("ERROR:Failed to open file on SD card");
+          showHome();
+          return;
+        }
+        
+        long bytesReceived = 0;
+        unsigned long lastPacketTime = millis();
+        
+        while (bytesReceived < fileSize && millis() - lastPacketTime < 10000) {
+          if (Serial.available()) {
+            uint8_t buf[512];
+            size_t toRead = min((long)sizeof(buf), fileSize - bytesReceived);
+            size_t readBytes = Serial.readBytes(buf, toRead);
+            if (readBytes > 0) {
+              file.write(buf, readBytes);
+              bytesReceived += readBytes;
+              lastPacketTime = millis();
+              
+              int barWidth = (bytesReceived * 200) / fileSize;
+              M5.Display.fillRect(60, 140, 200, 10, BLACK);
+              M5.Display.fillRect(60, 140, barWidth, 10, GREEN);
+              M5.Display.drawRoundRect(60, 140, 200, 10, 2, WHITE);
+            }
+          }
+          delay(1);
+        }
+        file.close();
+        
+        if (bytesReceived == fileSize) {
+          Serial.println("OK:Success");
+        } else {
+          Serial.println("ERROR:Timeout");
+        }
+        
+        showHome();
+      }
+    }
+  }
+}
+
 }  // namespace
 
 void setup() {
@@ -96,6 +158,7 @@ void setup() {
 }
 
 void loop() {
+  handleSerialTransfer();
   M5.update();
 
   if (appMode == AppMode::Home) {
