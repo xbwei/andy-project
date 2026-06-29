@@ -12,3 +12,6 @@ scores.txt
 # Media assets (wav/mp3)
 *.wav
 *.mp3
+
+# Local private vocabulary file containing family names
+data/questions.csv
