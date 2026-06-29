@@ -3,7 +3,7 @@
 A collection of interactive games designed for the M5Stack Core2 ESP32 development kit. The games feature offline touch controls, real audio playback, and vibration feedback.
 
 > [!NOTE]
-> **Co-Creation Project**: This is a personal, open-source educational hobby repository co-created by an 8-year-old boy (Andy) and his father. We are **not selling any products or hardware**. All code here is purely for personal fun and learning.
+> **Co-Creation Project**: This is an open-source educational hobby project. We are **not selling any products or hardware**. All code here is for personal fun and learning.
 
 ## 📂 Future Multi-Game Architecture
 To support adding other types of learning games in the future (e.g. math, spelling, puzzles), the repository and the SD card structure are organized into self-contained subfolders per game:
