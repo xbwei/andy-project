@@ -5,6 +5,8 @@
 This repository contains Andy's personal projects and web pages. The
 `core2/` directory owns the standalone M5Stack Core2 game firmware.
 
+When changing the firmware, also follow [`core2/AGENTS.md`](./core2/AGENTS.md).
+
 ## Core2 boundary
 
 - Treat `core2/` as a completely local, offline game.
@@ -23,6 +25,9 @@ Run Core2 commands from `core2/`:
 ```bash
 pio run -e m5stack-core2
 ```
+
+Do not upload firmware to a physical device unless Xuebin or Andy explicitly
+asks for a device deployment.
 
 Before committing firmware changes, also run:
 
