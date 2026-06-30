@@ -255,7 +255,7 @@ void spawnEnemy() {
     enemies[i].type = type;
 
     float waveSpeed = ENEMY_BASE_SPEED + wave * SPEED_RAMP;
-    if (type == 1)      { enemies[i].speed = waveSpeed * 1.6f; enemies[i].hp = 1; }
+    if (type == 1)      { enemies[i].speed = waveSpeed * 1.6f; enemies[i].hp = 2; }
     else if (type == 2) { enemies[i].speed = waveSpeed * 0.7f; enemies[i].hp = 3; }
     else                { enemies[i].speed = waveSpeed;         enemies[i].hp = 1; }
     return;
