@@ -59,6 +59,7 @@ uint16_t bulletColor;
 uint16_t enemyRedColor;
 uint16_t enemyBlueColor;
 uint16_t enemyGreenColor;
+uint16_t enemyBossColor;
 uint16_t hpFullColor;
 uint16_t hpEmptyColor;
 uint16_t headerBgColor;
@@ -136,6 +137,7 @@ bool  waveCleared;
 bool  waveDamageFree;
 int   enemiesRemaining;
 unsigned long nextSpawnTime;
+bool  bossSpawned;
 
 // --- Mutable stats (modified by upgrades) ---
 unsigned long curShootCooldown;
@@ -161,6 +163,31 @@ void drawCentered(const char* text, int x, int y, int sz, uint16_t color) {
   canvas.setTextColor(color);
   canvas.drawString(text, x, y);
   canvas.setTextDatum(top_left);
+}
+
+void drawPentagon(int cx, int cy, int r, uint16_t color) {
+  float rad = (float)r;
+  int x0 = cx;
+  int y0 = cy - r;
+  int x1 = cx + (int)(0.951f * rad);
+  int y1 = cy - (int)(0.309f * rad);
+  int x2 = cx + (int)(0.588f * rad);
+  int y2 = cy + (int)(0.809f * rad);
+  int x3 = cx - (int)(0.588f * rad);
+  int y3 = cy + (int)(0.809f * rad);
+  int x4 = cx - (int)(0.951f * rad);
+  int y4 = cy - (int)(0.309f * rad);
+
+  canvas.fillTriangle(x0, y0, x1, y1, x2, y2, color);
+  canvas.fillTriangle(x0, y0, x2, y2, x3, y3, color);
+  canvas.fillTriangle(x0, y0, x3, y3, x4, y4, color);
+
+  // White outline
+  canvas.drawLine(x0, y0, x1, y1, WHITE);
+  canvas.drawLine(x1, y1, x2, y2, WHITE);
+  canvas.drawLine(x2, y2, x3, y3, WHITE);
+  canvas.drawLine(x3, y3, x4, y4, WHITE);
+  canvas.drawLine(x4, y4, x0, y0, WHITE);
 }
 
 // ---------- Particles ----------
@@ -243,7 +270,10 @@ void spawnEnemy() {
     }
 
     int type = 0;
-    if (wave >= 3) {
+    if (wave % 10 == 0 && !bossSpawned) {
+      type = 3;
+      bossSpawned = true;
+    } else if (wave >= 3) {
       int roll = random(100);
       if (wave >= 5 && roll < 15)      type = 2;
       else if (roll < 35)              type = 1;
@@ -255,7 +285,8 @@ void spawnEnemy() {
     enemies[i].type = type;
 
     float waveSpeed = ENEMY_BASE_SPEED + wave * SPEED_RAMP;
-    if (type == 1)      { enemies[i].speed = waveSpeed * 1.6f; enemies[i].hp = 2; }
+    if (type == 3)      { enemies[i].speed = waveSpeed * 0.4f; enemies[i].hp = 20; }
+    else if (type == 1) { enemies[i].speed = waveSpeed * 1.6f; enemies[i].hp = 2; }
     else if (type == 2) { enemies[i].speed = waveSpeed * 0.7f; enemies[i].hp = 3; }
     else                { enemies[i].speed = waveSpeed;         enemies[i].hp = 1; }
     return;
@@ -314,8 +345,8 @@ void fireSpecial() {
     spawnParticles(enemies[i].x, enemies[i].y, explosionColor, 4);
     if (enemies[i].hp <= 0) {
       enemies[i].active = false;
-      score += 1;
-      spawnParticles(enemies[i].x, enemies[i].y, explosionColor, 4);
+      score += (enemies[i].type == 3) ? 5 : 1;
+      spawnParticles(enemies[i].x, enemies[i].y, explosionColor, (enemies[i].type == 3) ? 15 : 4);
     }
   }
   // No white flash — it was hurting eyes
@@ -417,10 +448,13 @@ void drawEnemies() {
     switch (enemies[i].type) {
       case 1:  c = enemyRedColor;   break;
       case 2:  c = enemyGreenColor; break;
+      case 3:  c = enemyBossColor;  break;
       default: c = enemyBlueColor;  break;
     }
 
-    if (enemies[i].type == 2) {
+    if (enemies[i].type == 3) {
+      drawPentagon(ex, ey, 16, c);
+    } else if (enemies[i].type == 2) {
       canvas.fillRect(ex - ENEMY_SIZE, ey - ENEMY_SIZE,
                       ENEMY_SIZE * 2, ENEMY_SIZE * 2, c);
       canvas.drawRect(ex - ENEMY_SIZE, ey - ENEMY_SIZE,
@@ -502,7 +536,8 @@ void updateEnemies() {
     enemies[i].y += (dy / len) * enemies[i].speed;
 
     // Hit base?
-    if (circleHit(enemies[i].x, enemies[i].y, ENEMY_SIZE,
+    int esz = (enemies[i].type == 3) ? 16 : ENEMY_SIZE;
+    if (circleHit(enemies[i].x, enemies[i].y, esz,
                   CENTER_X, CENTER_Y, BASE_RADIUS)) {
       enemies[i].active = false;
       if (shieldActive) {
@@ -543,16 +578,17 @@ void updateBullets() {
 
     for (int e = 0; e < MAX_ENEMIES; ++e) {
       if (!enemies[e].active) continue;
+      int esz = (enemies[e].type == 3) ? 16 : ENEMY_SIZE;
       if (circleHit(bullets[i].x, bullets[i].y, curBulletRadius,
-                    enemies[e].x, enemies[e].y, ENEMY_SIZE)) {
+                    enemies[e].x, enemies[e].y, esz)) {
         bullets[i].active = false;
         enemies[e].hp--;
         playHitSound();
         spawnParticles(enemies[e].x, enemies[e].y, explosionColor, 3);
         if (enemies[e].hp <= 0) {
           enemies[e].active = false;
-          score += 1;
-          spawnParticles(enemies[e].x, enemies[e].y, explosionColor, 5);
+          score += (enemies[e].type == 3) ? 5 : 1;
+          spawnParticles(enemies[e].x, enemies[e].y, explosionColor, (enemies[e].type == 3) ? 15 : 5);
         }
         break;
       }
@@ -589,6 +625,7 @@ void startNextWave() {
   waveCleared = false;
   waveDamageFree = true;
   wavePauseUntil = millis() + WAVE_PAUSE_MS;
+  bossSpawned = false;
 }
 
 // ---------- Upgrade system ----------
@@ -773,6 +810,7 @@ void start() {
   waveTextColor  = canvas.color565(33, 205, 224);
   scoreTextColor = canvas.color565(255, 220, 100);
   explosionColor = canvas.color565(255, 180, 50);
+  enemyBossColor = canvas.color565(200, 50, 255);
 
   // Reset state
   playerAngle    = -M_PI / 2.0f;
@@ -794,6 +832,7 @@ void start() {
   enemiesRemaining = 0;
   nextSpawnTime  = 0;
   showingUpgrades = false;
+  bossSpawned    = false;
 
   // Reset upgradeable stats
   curShootCooldown = SHOOT_COOLDOWN;
