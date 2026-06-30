@@ -57,7 +57,7 @@ If you are developing or deploying with the help of an AI Coding Assistant or Co
      ```bash
      python sync_assets.py
      ```
-   * Ensure your private questions are saved in `core2/data/hanzi/questions.csv` and audio files in `core2/data/hanzi/` before running.
+   * Ensure your private questions are saved in `games/core2/data/hanzi/questions.csv` and audio files in `games/core2/data/hanzi/` before running.
 
 ---
 

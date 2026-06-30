@@ -2,13 +2,13 @@
 
 ## Project scope
 
-This repository contains Andy's creative projects and web pages. The `core2/` directory owns the standalone M5Stack Core2 game firmware.
+This repository contains Andy's creative projects and web pages. The `games/core2/` directory owns the standalone M5Stack Core2 game firmware.
 
-When changing the firmware, also follow [`core2/AGENTS.md`](./core2/AGENTS.md).
+When changing the firmware, also follow [`games/core2/AGENTS.md`](./games/core2/AGENTS.md).
 
 ## Core2 boundary
 
-- Treat `core2/` as a completely local, offline game.
+- Treat `games/core2/` as a completely local, offline game.
 - Do not connect it to the LBSocial Mac mini, `lbsocial-local-ai`, Ollama, or any cloud or local AI service.
 - Do not add Wi-Fi, remote APIs, telemetry, accounts, or network-required gameplay unless the repository owner explicitly changes the project direction.
 - Keep gameplay deterministic and functional without any external service.
@@ -16,7 +16,7 @@ When changing the firmware, also follow [`core2/AGENTS.md`](./core2/AGENTS.md).
 
 ## Build and verification
 
-Run Core2 commands from `core2/`:
+Run Core2 commands from `games/core2/`:
 
 ```bash
 pio run -e m5stack-core2

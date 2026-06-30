@@ -83,7 +83,7 @@ the completion screen, sound, and vibration.
 ## Git workflow
 
 - Check `git status --short --branch` before editing.
-- Keep changes within `core2/` unless the repository README also needs a short
+- Keep changes within `games/core2/` unless the repository README also needs a short
   project-list update.
 - Review generated diffs and ensure `.pio/` is not staged.
 - Follow the workflow explicitly requested by the user; do not assume a PR or
