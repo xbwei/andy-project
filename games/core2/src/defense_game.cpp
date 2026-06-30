@@ -284,11 +284,18 @@ void spawnEnemy() {
     enemies[i].y = ey;
     enemies[i].type = type;
 
+    int bossNum = wave / 10;
+    if (bossNum < 1) bossNum = 1;
+    float speedScale = 1.0f + (bossNum - 1) * 0.10f;
+
     float waveSpeed = ENEMY_BASE_SPEED + wave * SPEED_RAMP;
-    if (type == 3)      { enemies[i].speed = waveSpeed * 0.4f; enemies[i].hp = 20; }
-    else if (type == 1) { enemies[i].speed = waveSpeed * 1.6f; enemies[i].hp = 2; }
-    else if (type == 2) { enemies[i].speed = waveSpeed * 0.7f; enemies[i].hp = 3; }
-    else                { enemies[i].speed = waveSpeed;         enemies[i].hp = 1; }
+    if (type == 3) {
+      enemies[i].speed = waveSpeed * (0.35f * speedScale);
+      enemies[i].hp = 20 + (bossNum - 1) * 5;
+    }
+    else if (type == 1) { enemies[i].speed = waveSpeed * (1.6f * speedScale); enemies[i].hp = 2; }
+    else if (type == 2) { enemies[i].speed = waveSpeed * (0.7f * speedScale); enemies[i].hp = 3; }
+    else                { enemies[i].speed = waveSpeed * (1.0f * speedScale); enemies[i].hp = 1; }
     return;
   }
 }
@@ -341,12 +348,18 @@ void fireSpecial() {
 
   for (int i = 0; i < MAX_ENEMIES; ++i) {
     if (!enemies[i].active) continue;
-    enemies[i].hp -= 2;
-    spawnParticles(enemies[i].x, enemies[i].y, explosionColor, 4);
-    if (enemies[i].hp <= 0) {
-      enemies[i].active = false;
-      score += (enemies[i].type == 3) ? 5 : 1;
-      spawnParticles(enemies[i].x, enemies[i].y, explosionColor, (enemies[i].type == 3) ? 15 : 4);
+    if (enemies[i].type == 0 && random(100) < 50) {
+      // Dodge!
+      spawnParticles(enemies[i].x, enemies[i].y, canvas.color565(180, 180, 180), 3);
+      M5.Speaker.tone(1800, 30);
+    } else {
+      enemies[i].hp -= 2;
+      spawnParticles(enemies[i].x, enemies[i].y, explosionColor, 4);
+      if (enemies[i].hp <= 0) {
+        enemies[i].active = false;
+        score += (enemies[i].type == 3) ? 5 : 1;
+        spawnParticles(enemies[i].x, enemies[i].y, explosionColor, (enemies[i].type == 3) ? 15 : 4);
+      }
     }
   }
   // No white flash — it was hurting eyes
@@ -582,13 +595,19 @@ void updateBullets() {
       if (circleHit(bullets[i].x, bullets[i].y, curBulletRadius,
                     enemies[e].x, enemies[e].y, esz)) {
         bullets[i].active = false;
-        enemies[e].hp--;
-        playHitSound();
-        spawnParticles(enemies[e].x, enemies[e].y, explosionColor, 3);
-        if (enemies[e].hp <= 0) {
-          enemies[e].active = false;
-          score += (enemies[e].type == 3) ? 5 : 1;
-          spawnParticles(enemies[e].x, enemies[e].y, explosionColor, (enemies[e].type == 3) ? 15 : 5);
+        if (enemies[e].type == 0 && random(100) < 50) {
+          // Dodge!
+          spawnParticles(enemies[e].x, enemies[e].y, canvas.color565(180, 180, 180), 3);
+          M5.Speaker.tone(1800, 30);
+        } else {
+          enemies[e].hp--;
+          playHitSound();
+          spawnParticles(enemies[e].x, enemies[e].y, explosionColor, 3);
+          if (enemies[e].hp <= 0) {
+            enemies[e].active = false;
+            score += (enemies[e].type == 3) ? 5 : 1;
+            spawnParticles(enemies[e].x, enemies[e].y, explosionColor, (enemies[e].type == 3) ? 15 : 5);
+          }
         }
         break;
       }
