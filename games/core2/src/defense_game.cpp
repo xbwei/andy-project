@@ -348,7 +348,11 @@ void fireSpecial() {
 
   for (int i = 0; i < MAX_ENEMIES; ++i) {
     if (!enemies[i].active) continue;
-    if (enemies[i].type == 0 && random(100) < 50) {
+    if (enemies[i].type == 3) {
+      // Invincible to special attack! Spawn grey shield sparks and play a distinct sound
+      spawnParticles(enemies[i].x, enemies[i].y, canvas.color565(150, 150, 170), 5);
+      M5.Speaker.tone(600, 50); // Deflect clank
+    } else if (enemies[i].type == 0 && random(100) < 50) {
       // Dodge!
       spawnParticles(enemies[i].x, enemies[i].y, canvas.color565(180, 180, 180), 3);
       M5.Speaker.tone(1800, 30);
