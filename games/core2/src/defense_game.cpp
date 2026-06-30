@@ -314,7 +314,7 @@ void fireSpecial() {
     spawnParticles(enemies[i].x, enemies[i].y, explosionColor, 4);
     if (enemies[i].hp <= 0) {
       enemies[i].active = false;
-      score += (enemies[i].type == 2) ? 30 : (enemies[i].type == 1) ? 15 : 10;
+      score += 1;
       spawnParticles(enemies[i].x, enemies[i].y, explosionColor, 4);
     }
   }
@@ -336,7 +336,7 @@ void drawHeader() {
 
   canvas.setTextColor(scoreTextColor);
   canvas.setCursor(130, 5);
-  canvas.printf("SCORE %d", score);
+  canvas.printf("CASH $%d", score);
 
   // HP as hearts
   for (int i = 0; i < BASE_MAX_HP; ++i) {
@@ -470,7 +470,7 @@ void drawGameOver() {
   drawCentered("GAME OVER", CENTER_X, 88, 3, canvas.color565(255, 60, 60));
 
   char buf[32];
-  snprintf(buf, sizeof(buf), "Score: %d", score);
+  snprintf(buf, sizeof(buf), "Cash: $%d", score);
   drawCentered(buf, CENTER_X, 120, 2, WHITE);
 
   snprintf(buf, sizeof(buf), "Waves: %d", wave - 1);
@@ -551,8 +551,7 @@ void updateBullets() {
         spawnParticles(enemies[e].x, enemies[e].y, explosionColor, 3);
         if (enemies[e].hp <= 0) {
           enemies[e].active = false;
-          score += (enemies[e].type == 2) ? 30
-                 : (enemies[e].type == 1) ? 15 : 10;
+          score += 1;
           spawnParticles(enemies[e].x, enemies[e].y, explosionColor, 5);
         }
         break;
@@ -651,6 +650,8 @@ void drawUpgradeScreen() {
 
   drawCentered("PICK AN UPGRADE!", CENTER_X, 38, 2, scoreTextColor);
 
+  bool canAfford = (score >= 10);
+
   for (int i = 0; i < UPGRADE_CHOICES; ++i) {
     int cx = UPG_START_X + i * (UPG_CARD_W + UPG_GAP);
     int idx = (int)upgradeChoices[i];
@@ -660,39 +661,64 @@ void drawUpgradeScreen() {
       ? canvas.color565(30, 80, 140)
       : canvas.color565(130, 50, 30);
 
+    if (!canAfford) {
+      // Gray out the card
+      cardColor = canvas.color565(40, 40, 45);
+    }
+
     // Shadow + card
     canvas.fillRoundRect(cx + 2, UPG_CARD_Y + 2, UPG_CARD_W, UPG_CARD_H, 6, BLACK);
     canvas.fillRoundRect(cx, UPG_CARD_Y, UPG_CARD_W, UPG_CARD_H, 6, cardColor);
-    canvas.drawRoundRect(cx, UPG_CARD_Y, UPG_CARD_W, UPG_CARD_H, 6, WHITE);
+
+    uint16_t borderColor = canAfford ? WHITE : canvas.color565(80, 80, 80);
+    canvas.drawRoundRect(cx, UPG_CARD_Y, UPG_CARD_W, UPG_CARD_H, 6, borderColor);
 
     // Label
-    uint16_t labelColor = isChar
-      ? canvas.color565(100, 200, 255)
-      : canvas.color565(255, 150, 100);
+    uint16_t labelColor;
+    if (canAfford) {
+      labelColor = isChar ? canvas.color565(100, 200, 255) : canvas.color565(255, 150, 100);
+    } else {
+      labelColor = canvas.color565(120, 120, 120);
+    }
     drawCentered(isChar ? "CHARACTER" : "BASE",
                  cx + UPG_CARD_W / 2, UPG_CARD_Y + 14, 1, labelColor);
 
     // Icon
     int iconY = UPG_CARD_Y + 30;
     int iconCX = cx + UPG_CARD_W / 2;
+    uint16_t iconColor = canAfford ? playerColor : canvas.color565(100, 100, 100);
+    uint16_t bColor = canAfford ? baseColor : canvas.color565(100, 100, 100);
+    uint16_t bGlowColor = canAfford ? baseGlowColor : canvas.color565(80, 80, 80);
     if (isChar) {
       canvas.fillTriangle(iconCX, iconY - 8, iconCX - 8, iconY,
-                          iconCX + 8, iconY, playerColor);
+                          iconCX + 8, iconY, iconColor);
       canvas.fillTriangle(iconCX, iconY + 8, iconCX - 8, iconY,
-                          iconCX + 8, iconY, playerColor);
+                          iconCX + 8, iconY, iconColor);
     } else {
-      canvas.fillCircle(iconCX, iconY, 8, baseColor);
-      canvas.drawCircle(iconCX, iconY, 10, baseGlowColor);
+      canvas.fillCircle(iconCX, iconY, 8, bColor);
+      canvas.drawCircle(iconCX, iconY, 10, bGlowColor);
     }
 
     // Name + description
-    drawCentered(upgradeNames[idx], cx + UPG_CARD_W / 2, UPG_CARD_Y + 55, 1, WHITE);
-    drawCentered(upgradeDescs[idx], cx + UPG_CARD_W / 2, UPG_CARD_Y + 75, 1,
-                 canvas.color565(180, 180, 200));
+    uint16_t textColor = canAfford ? WHITE : canvas.color565(150, 150, 150);
+    uint16_t descColor = canAfford ? canvas.color565(180, 180, 200) : canvas.color565(110, 110, 110);
+    drawCentered(upgradeNames[idx], cx + UPG_CARD_W / 2, UPG_CARD_Y + 52, 1, textColor);
+    drawCentered(upgradeDescs[idx], cx + UPG_CARD_W / 2, UPG_CARD_Y + 70, 1, descColor);
+
+    // Cost display
+    uint16_t costColor = canAfford ? canvas.color565(100, 255, 100) : canvas.color565(255, 100, 100);
+    drawCentered("Cost: $10", cx + UPG_CARD_W / 2, UPG_CARD_Y + 92, 1, costColor);
   }
 
-  drawCentered("Tap a card!", CENTER_X, SCREEN_H - 12, 1,
-               canvas.color565(150, 150, 170));
+  // Draw "NEXT WAVE" button
+  int btnX = 90;
+  int btnY = 184;
+  int btnW = 140;
+  int btnH = 26;
+  canvas.fillRoundRect(btnX, btnY, btnW, btnH, 4, canvas.color565(50, 50, 60));
+  canvas.drawRoundRect(btnX, btnY, btnW, btnH, 4, WHITE);
+  drawCentered("NEXT WAVE", CENTER_X, btnY + btnH / 2, 1, WHITE);
+
   canvas.pushSprite(0, 0);
 }
 
@@ -831,15 +857,34 @@ DefenseGameAction update() {
     if (M5.Touch.getCount() > 0) {
       const auto& t = M5.Touch.getDetail();
       if (t.wasPressed()) {
+        // Check if cards are clicked
         for (int i = 0; i < UPGRADE_CHOICES; ++i) {
           int cx = UPG_START_X + i * (UPG_CARD_W + UPG_GAP);
           if (t.x >= cx && t.x < cx + UPG_CARD_W &&
               t.y >= UPG_CARD_Y && t.y < UPG_CARD_Y + UPG_CARD_H) {
-            applyUpgrade(upgradeChoices[i]);
-            showingUpgrades = false;
-            startNextWave();
+            Serial.printf("Card touched: %d, Current Cash: %d\n", i, score);
+            if (score >= 10) {
+              score -= 10;
+              Serial.printf("Deducted $10. New Cash: %d\n", score);
+              applyUpgrade(upgradeChoices[i]);
+              showingUpgrades = false;
+              startNextWave();
+            } else {
+              Serial.printf("Not enough cash for card %d!\n", i);
+              // Play error buzzer tone
+              M5.Speaker.tone(150, 150);
+              M5.Power.setVibration(100);
+              vibrationOffTime = millis() + 100;
+            }
             break;
           }
+        }
+        // Check if NEXT WAVE button is clicked
+        if (t.x >= 90 && t.x < 90 + 140 &&
+            t.y >= 184 && t.y < 184 + 26) {
+          M5.Speaker.tone(800, 50);
+          showingUpgrades = false;
+          startNextWave();
         }
       }
     }
@@ -897,7 +942,7 @@ DefenseGameAction update() {
   if (!waveCleared && allEnemiesCleared()) {
     waveCleared = true;
     if (waveDamageFree) {
-      score += 50;
+      score += 5;
     }
     playWaveCompleteSound();
     showingUpgrades = true;
