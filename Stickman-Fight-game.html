@@ -723,8 +723,15 @@
     });
 
     // Keyboard controls (WASD / Arrows + Space + P)
+    const CONTROL_KEYS = ['arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' ', 'w', 'a', 's', 'd', 'p'];
+    
     document.addEventListener('keydown', (e) => {
       const key = e.key.toLowerCase();
+      
+      // Prevent browser scrolling/default action for control keys
+      if (CONTROL_KEYS.includes(key) || CONTROL_KEYS.includes(e.code.toLowerCase())) {
+        e.preventDefault();
+      }
 
       if (!isRunning && (e.code === 'Space' || key === ' ')) {
         startGame();
@@ -741,13 +748,15 @@
       if (e.code === 'ArrowUp'    || key === 'w') moveEntity(player, 'up');
       if (e.code === 'ArrowDown'  || key === 's') moveEntity(player, 'down');
 
-      if (e.code === 'Space') {
+      if (e.code === 'Space' || key === ' ') {
         isShooting = true;
       }
     });
 
     document.addEventListener('keyup', (e) => {
-      if (e.code === 'Space') {
+      const key = e.key.toLowerCase();
+      if (key === ' ' || e.code === 'Space') {
+        e.preventDefault();
         isShooting = false;
       }
     });
