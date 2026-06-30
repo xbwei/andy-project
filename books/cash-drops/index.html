@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dog Man · 狗狗侠 — Book Reader</title>
+  <title>Cash Drops · 现金空投 — Book Reader</title>
   <!-- Import Outfit and Inter fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,7 +18,7 @@
       --text-main: #f3f4f6;
       --text-muted: #9ca3af;
       --accent-cyan: #37ebf3;
-      --accent-orange: #f97316;
+      --accent-green: #10b981;
       --accent-purple: #a855f7;
     }
 
@@ -53,7 +53,7 @@
       font-weight: 800;
       letter-spacing: -0.02em;
       margin-bottom: 8px;
-      background: linear-gradient(135deg, #fff 35%, var(--accent-orange) 100%);
+      background: linear-gradient(135deg, #fff 35%, var(--accent-green) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
@@ -106,7 +106,7 @@
 
     .art-img {
       max-width: 100%;
-      max-height: 70vh;
+      max-height: 75vh;
       object-fit: contain;
       border-radius: 12px;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
@@ -125,7 +125,7 @@
       height: 40px;
       border: 3px solid rgba(255, 255, 255, 0.1);
       border-radius: 50%;
-      border-top-color: var(--accent-orange);
+      border-top-color: var(--accent-green);
       animation: spin 1s ease-in-out infinite;
       z-index: 10;
     }
@@ -147,7 +147,7 @@
       font-size: 1.25rem;
       font-weight: 600;
       margin-bottom: 16px;
-      color: var(--accent-orange);
+      color: var(--accent-green);
     }
 
     .cap-block {
@@ -176,7 +176,7 @@
 
     .num {
       font-weight: 600;
-      color: var(--accent-orange);
+      color: var(--accent-green);
       margin-right: 6px;
     }
 
@@ -208,9 +208,9 @@
     }
 
     .btn:hover:not([disabled]) {
-      background: var(--accent-orange);
-      border-color: var(--accent-orange);
-      box-shadow: 0 0 15px rgba(249, 115, 22, 0.4);
+      background: var(--accent-green);
+      border-color: var(--accent-green);
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
       transform: translateY(-2px);
     }
 
@@ -272,8 +272,8 @@
 <body>
   <div class="wrap">
     <header>
-      <h1>📚 Dog Man · 狗狗侠</h1>
-      <p class="sub">Andy’s mini-book — bilingual, page-by-page. ｜ 安迪的小册子——中英文逐页对照。</p>
+      <h1>💵 Cash Drops · 现金空投</h1>
+      <p class="sub">A new comic by Andy — bilingual, page-by-page. ｜ 安迪的新漫画——中英文逐页对照阅读。</p>
       <p class="meta"><strong>Published / 出版日期:</strong> 2025-10-12</p>
     </header>
 
@@ -300,28 +300,71 @@
     </div>
 
     <p style="text-align:center;margin:24px 0 0;">
-      <a class="index-link" href="../index.html">⬅ Back to homepage · 返回首页</a>
+      <a class="index-link" href="../../index.html">⬅ Back to homepage · 返回首页</a>
     </p>
   </div>
 
   <script>
     const PAGES = [
       {
-        img: "page1.jpg",
+        img: "page-1.jpg",
         title: { en: "Cover", zh: "封面" },
+        blocks: []
+      },
+      {
+        img: "page-2.jpg",
+        title: { en: "Page 2", zh: "第2页" },
         blocks: [
-          { en: "Dog Man — my favorite comic.", zh: "《狗狗侠》——我最喜欢的漫画。" },
-          { en: "By Andy.", zh: "作者：安迪。" }
+          { en: "Once a guy pushed a button. Then cash drops fell from the sky.",
+            zh: "有一天，一个人按下了一个按钮。然后现金从天而降。" },
+          { en: "So he started searching to find where the cash drops were made.",
+            zh: "于是他开始寻找这些现金空投是在哪里制造的。" },
+          { en: "He arrived at the military and thought they were made there.",
+            zh: "他来到军营，以为这些现金是在那里制造的。" }
         ]
       },
       {
-        img: "page2.jpg",
-        title: { en: "Why I like Dog Man", zh: "我为什么喜欢《狗狗侠》" },
+        img: "page-3.jpg",
+        title: { en: "Page 3", zh: "第3页" },
         blocks: [
-          { en: "Dog Man is my favorite comic because it’s funny.", zh: "我最喜欢《狗狗侠》，因为它很有趣。" },
-          { en: "It has Flip-O-Ramas (flip animations).", zh: "书里有“翻页动画”（Flip-O-Rama）。" },
-          { en: "It also has lots of drawings.", zh: "而且里面有很多有意思的插画。" },
-          { en: "That’s why Dog Man is my favorite comic.", zh: "这就是我最喜欢《狗狗侠》的原因。" }
+          { en: "He searched many places and became very tired.",
+            zh: "他到处寻找，非常疲惫。" },
+          { en: "So he went back home and slept for seventeen hours!",
+            zh: "于是他回家睡觉，一睡就是十七个小时！" }
+        ]
+      },
+      {
+        img: "page-4.jpg",
+        title: { en: "Page 4", zh: "第4页" },
+        blocks: [
+          { en: "When he woke up, he left the house and started searching again.",
+            zh: "醒来后，他走出房子，又继续寻找。" },
+          { en: "Then his friend came over. “What are you doing?”",
+            zh: "这时朋友过来了：“你在干什么？”" },
+          { en: "“I'm searching where the cash drops are from. Can I help?” — “Yes!”",
+            zh: "“我在找现金空投从哪里来。”“我可以帮你吗？”——“当然可以！”" }
+        ]
+      },
+      {
+        img: "page-5.jpg",
+        title: { en: "Page 5", zh: "第5页" },
+        blocks: [
+          { en: "They searched together. But wait—what is this?",
+            zh: "他们一起寻找。等等——这是什么？" },
+          { en: "They arrived at the military base again.",
+            zh: "他们又来到了军营。" },
+          { en: "“Why are you here?” asked the soldiers.",
+            zh: "士兵问：“你们为什么在这里？”" }
+        ]
+      },
+      {
+        img: "page-6.jpg",
+        title: { en: "Page 6", zh: "第6页" },
+        blocks: [
+          { en: "“Do you know about the cash drops?” asked the boy.",
+            zh: "男孩问：“你们知道现金空投的事吗？”" },
+          { en: "“Yes, now we know,” said the soldiers. The End.",
+            zh: "“知道了，现在我们都明白了。”士兵说。——结束。" }
         ]
       }
     ];
@@ -337,7 +380,6 @@
     let i = 0;
     const preloadedImages = {};
 
-    // Preloads adjacent images (next & prev) into cache
     function preload(index) {
       [index - 1, index + 1].forEach(idx => {
         if (idx >= 0 && idx < PAGES.length && !preloadedImages[idx]) {
@@ -351,7 +393,6 @@
     function render() {
       const p = PAGES[i];
       
-      // Update texts
       titleEl.textContent = `${p.title.en} · ${p.title.zh}`;
       listEl.innerHTML = p.blocks.map((b, idx) => `
         <div class="cap-block">
@@ -364,31 +405,26 @@
       prevBtn.disabled = i === 0;
       nextBtn.disabled = i === PAGES.length - 1;
 
-      // Handle image load
       spinnerEl.style.display = 'block';
       imgEl.classList.remove('loaded');
       
-      // Load current image
       imgEl.src = p.img;
       imgEl.onload = () => {
         spinnerEl.style.display = 'none';
         imgEl.classList.add('loaded');
       };
       
-      // Start background preloading of adjacent images
       preload(i);
     }
 
     prevBtn.addEventListener('click', () => { if(i > 0) { i--; render(); } });
     nextBtn.addEventListener('click', () => { if(i < PAGES.length - 1) { i++; render(); } });
     
-    // Keyboard listener
     document.addEventListener('keydown', e => {
       if (e.key === 'ArrowLeft' && i > 0) prevBtn.click();
       if (e.key === 'ArrowRight' && i < PAGES.length - 1) nextBtn.click();
     });
 
-    // Touch gesture swipe
     let x0 = null;
     const pageContainer = document.getElementById('page');
     pageContainer.addEventListener('touchstart', e => {
