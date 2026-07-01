@@ -72,6 +72,7 @@ enum class UpgradeType {
   RapidFire,     // character: shoot faster
   BigBullets,    // character: larger + faster bullets
   SpeedBoost,    // character: move faster
+  SuperBigBullets,// character: super large + fast bullets
   Heal,          // base: restore 1 HP
   Shield,        // base: block next hit
   ExtraSpecial,  // base: +1 max special & refill
@@ -82,16 +83,16 @@ constexpr int UPGRADE_COUNT = (int)UpgradeType::COUNT;
 constexpr int UPGRADE_CHOICES = 3;
 
 const char* upgradeNames[] = {
-  "RAPID FIRE", "BIG BULLETS", "SPEED UP",
+  "RAPID FIRE", "BIG BULLETS", "SPEED UP", "SUPER BIG BULLETS",
   "HEAL +1", "SHIELD", "EXTRA SPECIAL"
 };
 
 const char* upgradeDescs[] = {
-  "Shoot faster", "Big bullets +1%", "Move faster",
+  "Shoot faster", "Big bullets +1%", "Move faster", "Super big +3%",
   "Restore 1 HP", "Block next hit", "+1 special ammo"
 };
 
-bool isCharUpgrade(UpgradeType t) { return (int)t < 3; }
+bool isCharUpgrade(UpgradeType t) { return (int)t < 4; }
 
 // --- Structs ---
 struct Bullet {
@@ -683,6 +684,12 @@ void applyUpgrade(UpgradeType up) {
     case UpgradeType::SpeedBoost:
       curPlayerSpeed += 1.5f;
       break;
+    case UpgradeType::SuperBigBullets:
+      curBulletRadius += 4;
+      curBulletSpeed += 1.2f;
+      circleDodgeChance -= 3;
+      if (circleDodgeChance < 0) circleDodgeChance = 0;
+      break;
     case UpgradeType::Heal:
       if (baseHP < BASE_MAX_HP) ++baseHP;
       break;
@@ -700,7 +707,11 @@ void applyUpgrade(UpgradeType up) {
   M5.Speaker.tone(1400, 80);
 }
 
-int getUpgradeCost() {
+int getUpgradeCost(UpgradeType t) {
+  if (t == UpgradeType::SuperBigBullets) {
+    if (wave < 1) return 30;
+    return 30 + (wave - 1) * 10;
+  }
   if (wave < 1) return 10;
   return 10 + (wave - 1);
 }
@@ -719,13 +730,14 @@ void drawUpgradeScreen() {
 
   drawCentered("PICK AN UPGRADE!", CENTER_X, 38, 2, scoreTextColor);
 
-  int cost = getUpgradeCost();
-  bool canAfford = (score >= cost);
-
   for (int i = 0; i < UPGRADE_CHOICES; ++i) {
     int cx = UPG_START_X + i * (UPG_CARD_W + UPG_GAP);
-    int idx = (int)upgradeChoices[i];
-    bool isChar = isCharUpgrade(upgradeChoices[i]);
+    UpgradeType ut = upgradeChoices[i];
+    int idx = (int)ut;
+    bool isChar = isCharUpgrade(ut);
+
+    int cost = getUpgradeCost(ut);
+    bool canAfford = (score >= cost);
 
     uint16_t cardColor = isChar
       ? canvas.color565(30, 80, 140)
@@ -772,7 +784,12 @@ void drawUpgradeScreen() {
     // Name + description
     uint16_t textColor = canAfford ? WHITE : canvas.color565(150, 150, 150);
     uint16_t descColor = canAfford ? canvas.color565(180, 180, 200) : canvas.color565(110, 110, 110);
-    drawCentered(upgradeNames[idx], cx + UPG_CARD_W / 2, UPG_CARD_Y + 52, 1, textColor);
+    if (ut == UpgradeType::SuperBigBullets) {
+      drawCentered("SUPER BIG", cx + UPG_CARD_W / 2, UPG_CARD_Y + 48, 1, textColor);
+      drawCentered("BULLETS", cx + UPG_CARD_W / 2, UPG_CARD_Y + 58, 1, textColor);
+    } else {
+      drawCentered(upgradeNames[idx], cx + UPG_CARD_W / 2, UPG_CARD_Y + 52, 1, textColor);
+    }
     drawCentered(upgradeDescs[idx], cx + UPG_CARD_W / 2, UPG_CARD_Y + 70, 1, descColor);
 
     // Cost display
@@ -938,11 +955,12 @@ DefenseGameAction update() {
           if (t.x >= cx && t.x < cx + UPG_CARD_W &&
               t.y >= UPG_CARD_Y && t.y < UPG_CARD_Y + UPG_CARD_H) {
             Serial.printf("Card touched: %d, Current Cash: %d\n", i, score);
-            int cost = getUpgradeCost();
+            UpgradeType ut = upgradeChoices[i];
+            int cost = getUpgradeCost(ut);
             if (score >= cost) {
               score -= cost;
               Serial.printf("Deducted $%d. New Cash: %d\n", cost, score);
-              applyUpgrade(upgradeChoices[i]);
+              applyUpgrade(ut);
               showingUpgrades = false;
               startNextWave();
             } else {
