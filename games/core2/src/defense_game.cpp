@@ -700,6 +700,11 @@ void applyUpgrade(UpgradeType up) {
   M5.Speaker.tone(1400, 80);
 }
 
+int getUpgradeCost() {
+  if (wave < 1) return 10;
+  return 10 + (wave - 1);
+}
+
 // Upgrade card layout constants
 constexpr int UPG_CARD_W = 96;
 constexpr int UPG_CARD_H = 110;
@@ -714,7 +719,8 @@ void drawUpgradeScreen() {
 
   drawCentered("PICK AN UPGRADE!", CENTER_X, 38, 2, scoreTextColor);
 
-  bool canAfford = (score >= 10);
+  int cost = getUpgradeCost();
+  bool canAfford = (score >= cost);
 
   for (int i = 0; i < UPGRADE_CHOICES; ++i) {
     int cx = UPG_START_X + i * (UPG_CARD_W + UPG_GAP);
@@ -771,7 +777,9 @@ void drawUpgradeScreen() {
 
     // Cost display
     uint16_t costColor = canAfford ? canvas.color565(100, 255, 100) : canvas.color565(255, 100, 100);
-    drawCentered("Cost: $10", cx + UPG_CARD_W / 2, UPG_CARD_Y + 92, 1, costColor);
+    char costStr[16];
+    snprintf(costStr, sizeof(costStr), "Cost: $%d", cost);
+    drawCentered(costStr, cx + UPG_CARD_W / 2, UPG_CARD_Y + 92, 1, costColor);
   }
 
   // Draw "NEXT WAVE" button
@@ -930,9 +938,10 @@ DefenseGameAction update() {
           if (t.x >= cx && t.x < cx + UPG_CARD_W &&
               t.y >= UPG_CARD_Y && t.y < UPG_CARD_Y + UPG_CARD_H) {
             Serial.printf("Card touched: %d, Current Cash: %d\n", i, score);
-            if (score >= 10) {
-              score -= 10;
-              Serial.printf("Deducted $10. New Cash: %d\n", score);
+            int cost = getUpgradeCost();
+            if (score >= cost) {
+              score -= cost;
+              Serial.printf("Deducted $%d. New Cash: %d\n", cost, score);
               applyUpgrade(upgradeChoices[i]);
               showingUpgrades = false;
               startNextWave();
