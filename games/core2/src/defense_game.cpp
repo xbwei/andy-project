@@ -87,7 +87,7 @@ const char* upgradeNames[] = {
 };
 
 const char* upgradeDescs[] = {
-  "Shoot faster", "Bigger bullets", "Move faster",
+  "Shoot faster", "Big bullets +1%", "Move faster",
   "Restore 1 HP", "Block next hit", "+1 special ammo"
 };
 
@@ -145,6 +145,7 @@ int   curBulletRadius;
 float curBulletSpeed;
 float curPlayerSpeed;
 bool  shieldActive;
+int   circleDodgeChance;
 
 // --- Upgrade selection state ---
 bool  showingUpgrades;
@@ -352,7 +353,7 @@ void fireSpecial() {
       // Invincible to special attack! Spawn grey shield sparks and play a distinct sound
       spawnParticles(enemies[i].x, enemies[i].y, canvas.color565(150, 150, 170), 5);
       M5.Speaker.tone(600, 50); // Deflect clank
-    } else if (enemies[i].type == 0 && random(100) < 50) {
+    } else if (enemies[i].type == 0 && random(100) < circleDodgeChance) {
       // Dodge!
       spawnParticles(enemies[i].x, enemies[i].y, canvas.color565(180, 180, 180), 3);
       M5.Speaker.tone(1800, 30);
@@ -599,7 +600,7 @@ void updateBullets() {
       if (circleHit(bullets[i].x, bullets[i].y, curBulletRadius,
                     enemies[e].x, enemies[e].y, esz)) {
         bullets[i].active = false;
-        if (enemies[e].type == 0 && random(100) < 50) {
+        if (enemies[e].type == 0 && random(100) < circleDodgeChance) {
           // Dodge!
           spawnParticles(enemies[e].x, enemies[e].y, canvas.color565(180, 180, 180), 3);
           M5.Speaker.tone(1800, 30);
@@ -675,6 +676,9 @@ void applyUpgrade(UpgradeType up) {
     case UpgradeType::BigBullets:
       curBulletRadius += 2;
       curBulletSpeed += 0.8f;
+      if (circleDodgeChance > 0) {
+        circleDodgeChance -= 1;
+      }
       break;
     case UpgradeType::SpeedBoost:
       curPlayerSpeed += 1.5f;
@@ -858,11 +862,12 @@ void start() {
   bossSpawned    = false;
 
   // Reset upgradeable stats
-  curShootCooldown = SHOOT_COOLDOWN;
-  curBulletRadius  = BULLET_RADIUS;
-  curBulletSpeed   = BULLET_SPEED;
-  curPlayerSpeed   = PLAYER_SPEED;
-  shieldActive     = false;
+  curShootCooldown  = SHOOT_COOLDOWN;
+  curBulletRadius   = BULLET_RADIUS;
+  curBulletSpeed    = BULLET_SPEED;
+  curPlayerSpeed    = PLAYER_SPEED;
+  shieldActive      = false;
+  circleDodgeChance = 50;
 
   for (int i = 0; i < MAX_BULLETS;   ++i) bullets[i].active   = false;
   for (int i = 0; i < MAX_ENEMIES;   ++i) enemies[i].active   = false;
