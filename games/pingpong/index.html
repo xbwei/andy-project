@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#08110e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Ping Pong">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon-180.png">
+  <title>Ping Pong Scorekeeper · Codex</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">LOCAL VISION SCOREKEEPER</p>
+        <h1>Ping Pong <span>Scorekeeper</span></h1>
+      </div>
+      <div class="privacy"><i></i> Local processing · No uploads</div>
+    </header>
+
+    <section class="scoreboard" aria-label="Scoreboard">
+      <button class="player player-left" data-score="left" aria-label="Point for Player 1">
+        <small>Camera left</small>
+        <strong id="leftName">Player 1</strong>
+        <b id="leftScore">0</b>
+        <span id="leftServe" class="serve">SERVE</span>
+      </button>
+      <div class="match-state">
+        <span id="gameState">Game 1</span>
+        <strong>:</strong>
+        <span>First to 11</span>
+      </div>
+      <button class="player player-right" data-score="right" aria-label="Point for Player 2">
+        <small>Camera right</small>
+        <strong id="rightName">Player 2</strong>
+        <b id="rightScore">0</b>
+        <span id="rightServe" class="serve hidden">SERVE</span>
+      </button>
+    </section>
+
+    <section class="workspace">
+      <div class="stage-card">
+        <div class="stage" id="stage">
+          <video id="video" playsinline muted></video>
+          <canvas id="view"></canvas>
+          <div id="emptyState" class="empty-state">
+            <strong>Mount the phone horizontally, then tap Start Match</strong>
+            <span>Video and impact sounds are processed only on this device</span>
+          </div>
+          <div id="statusPill" class="status-pill">Waiting for camera</div>
+          <div id="toast" class="toast"></div>
+        </div>
+        <div class="stage-actions">
+          <button id="cameraBtn">Open Camera</button>
+          <button id="closeCameraBtn" disabled>Close Camera</button>
+          <label class="file-btn">
+            Open Video
+            <input id="fileInput" type="file" accept="video/*">
+          </label>
+          <button id="calibrateBtn">Set 4 Table Corners</button>
+          <button id="autoBtn" class="toggle active" aria-pressed="true">Auto Score: On</button>
+        </div>
+      </div>
+
+      <aside class="panel">
+        <section>
+          <div class="section-title">
+            <h2>Match Controls</h2>
+            <span id="rallyDot" class="rally-dot"></span>
+          </div>
+          <button id="matchBtn" class="wide primary match-button">▶ Start Match</button>
+          <div class="camera-tools">
+            <button id="cameraFacingBtn">Camera: Rear</button>
+            <button id="recordBtn" disabled>● Record Match</button>
+            <a id="recordingLink" class="recording-link hidden" href="#">Save Recording</a>
+          </div>
+          <div class="control-grid">
+            <button id="undoBtn">↶ Undo</button>
+            <button id="swapBtn">⇄ Swap Sides</button>
+            <button id="resetBtn" class="danger">Reset</button>
+          </div>
+          <p class="hint">Tap a player score, or use <kbd>A</kbd>/<kbd>L</kbd>. Press <kbd>Cmd/Ctrl + Z</kbd> to undo.</p>
+        </section>
+
+        <section>
+          <h2>Detection Status</h2>
+          <dl class="metrics">
+            <div><dt>Ball confidence</dt><dd id="confidence">—</dd></div>
+            <div><dt>Impact detector</dt><dd id="audioStatus">Off</dd></div>
+            <div><dt>Rally status</dt><dd id="rallyState">Not started</dd></div>
+            <div><dt>Last detected side</dt><dd id="lastSide">—</dd></div>
+          </dl>
+          <p class="warning">Automatic scoring is experimental. Occlusion and out-of-bounds shots can still require Undo.</p>
+        </section>
+
+        <section>
+          <div class="section-title">
+            <h2>Score History</h2>
+            <button id="clearHistory" class="text-btn">Clear</button>
+          </div>
+          <ol id="history" class="history">
+            <li class="empty-history">No points yet</li>
+          </ol>
+        </section>
+      </aside>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
