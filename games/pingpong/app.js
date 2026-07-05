@@ -136,6 +136,30 @@ function reset() {
 
 function opposite(side) { return side === "left" ? "right" : "left"; }
 
+function escapeHTML(str) {
+  return String(str).replace(/[&<>'"]/g, (tag) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    "'": '&#39;',
+    '"': '&quot;'
+  }[tag]));
+}
+
+function updateHistoryUI() {
+  const list = $("#historyList");
+  if (state.history.length === 0) {
+    list.innerHTML = '<li class="empty-history">No points yet</li>';
+    return;
+  }
+  list.innerHTML = state.history.slice().reverse().map((event) => `
+    <li>
+      <span>${escapeHTML(state.names[event.side])} +1 — ${escapeHTML(event.source)}</span>
+      <time>${event.at.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</time>
+    </li>
+  `).join("");
+}
+
 function renderHistory() {
   const list = $("#history");
   if (!state.history.length) {
@@ -144,7 +168,7 @@ function renderHistory() {
   }
   list.innerHTML = state.history.slice().reverse().map((event) => `
     <li>
-      <span>${state.names[event.side]} +1 · ${event.source}</span>
+      <span>${escapeHTML(state.names[event.side])} +1 · ${escapeHTML(event.source)}</span>
       <time>${event.at.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</time>
     </li>
   `).join("");

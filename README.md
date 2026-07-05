@@ -13,20 +13,21 @@ Visit the live portal here: [https://xbwei.github.io/andy-project/](https://xbwe
 
 ### 👾 Interactive Games
 
-#### 1. Hardware Coding: Educational Games Engine (`games/core2/`)
+#### 1. 🀄 Hanzi Quest
 * **Location**: [`games/core2/`](./games/core2/)
-* **Description**: A collection of standalone, offline educational and arcade games designed for the M5Stack Core2. Features **Hanzi Quest** and **Base Defense**, with a modular directory layout structured to support future learning games such as math and spelling.
-* **Key Features**:
-  * **Fully Offline**: Does not use Wi-Fi, cloud services, local AI, or network APIs.
-  * **Interactive Feedback**: Touch-controlled cards, screen animations, vibration motors, and real voice WAV file playback via the internal speaker.
-  * **Dynamic Configurations per Game**: Loads configurations, such as Hanzi questions, from each game's subdirectory.
-  * **Zero-Touch SD Card Update**: Project files can be updated on GitHub. Compiling and flashing the firmware embeds the CSV and updates the SD card copy on boot.
+* **Description**: An educational vocabulary learning game designed for the M5Stack Core2. 
+* **Key Features**: Fully offline (no Wi-Fi/cloud). Features touch-controlled cards, screen animations, vibration feedback, and real voice WAV playback. Loads CSV questions dynamically. Zero-touch SD card update via firmware flashing.
 
-#### 2. ⚔️ Stickman Fight Game
+#### 2. 🛡️ Base Defense
+* **Location**: [`games/core2/`](./games/core2/)
+* **Description**: A standalone arcade game for the M5Stack Core2.
+* **Key Features**: Runs fully offline on the M5Stack Core2 hardware. Features screen animations and hardware interactions.
+
+#### 3. ⚔️ Stickman Fight Game
 * **Location**: [`games/stickman-fight/index.html`](./games/stickman-fight/index.html)
 * **Description**: An action-packed stickman battle game built as a webpage with ChatGPT.
 
-#### 3. 🏓 Ping Pong Scorekeeper
+#### 4. 🏓 Ping Pong Scorekeeper
 * **Location**: [`games/pingpong/index.html`](./games/pingpong/index.html)
 * **Description**: An automated, offline Ping Pong scorekeeper using computer vision and audio impact detection right in the browser.
 

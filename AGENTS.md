@@ -37,6 +37,7 @@ git diff --check
 - Use English for code, comments, filenames, and technical documentation.
 - Do not create a pull request when the repository owner explicitly requests direct `main`; verify that only intended files are changed before committing or pushing.
 - After every coding change or feature completion, ask whether the project should be updated on GitHub.
+- **When creating a new PR or uploading new changes via PR, you MUST include `@codex-review` in the PR description or comment to request a review.**
 
 ## Audience and tone
 
@@ -49,7 +50,8 @@ git diff --check
 
 ## Privacy and confidentiality
 
-- This repository is public.
+- **CRITICAL**: This repository is public.
 - Keep repository content focused on the projects themselves.
-- Do not write, store, or commit personal information such as exact age, birthday, school, class, teacher, home location, full legal name, private discussion details, account credentials, device secrets, or private chat transcript details.
+- **Strict Privacy**: Do NOT write, store, or commit personal information under any circumstances. This includes real names, exact age, birthday, school, class, teacher, home location, private discussion details, account credentials, device secrets, or private chat transcript details.
+- **Network Privacy**: NEVER upload or commit internal network details, including our Tailscale IP, Mac mini IP, or any other private infrastructure IPs.
 - Do not add analytics, tracking scripts, ads, uploads, forms collecting personal information, account features, camera access, or microphone access unless the repository owner explicitly approves that direction.
