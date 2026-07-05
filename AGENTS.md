@@ -35,9 +35,8 @@ git diff --check
 - Inspect the current Git state and relevant files before editing.
 - Keep changes scoped to Andy's projects.
 - Use English for code, comments, filenames, and technical documentation.
-- Do not create a pull request when the repository owner explicitly requests direct `main`; verify that only intended files are changed before committing or pushing.
-- After every coding change or feature completion, ask whether the project should be updated on GitHub.
-- **When creating a new PR or uploading new changes via PR, you MUST include `@codex-review` in the PR description or comment to request a review.**
+- **Mandatory Pull Request Workflow**: ALL future modifications must be made via a Pull Request. Do NOT commit or push directly to the `main` branch.
+- **Codex Review**: When creating a new PR or uploading new changes via PR, you MUST include `@codex-review` in the PR description or comment to request a Codex AI review. Wait for Codex to review and address any feedback before merging.
 
 ## Audience and tone
 
