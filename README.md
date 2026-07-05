@@ -11,7 +11,9 @@ Visit the live portal here: [https://xbwei.github.io/andy-project/](https://xbwe
 
 ## Projects Directory
 
-### 1. 👾 Hardware Coding: Educational Games Engine (`games/core2/`)
+### 👾 Interactive Games
+
+#### 1. Hardware Coding: Educational Games Engine (`games/core2/`)
 * **Location**: [`games/core2/`](./games/core2/)
 * **Description**: A collection of standalone, offline educational and arcade games designed for the M5Stack Core2. Features **Hanzi Quest** and **Base Defense**, with a modular directory layout structured to support future learning games such as math and spelling.
 * **Key Features**:
@@ -20,29 +22,31 @@ Visit the live portal here: [https://xbwei.github.io/andy-project/](https://xbwe
   * **Dynamic Configurations per Game**: Loads configurations, such as Hanzi questions, from each game's subdirectory.
   * **Zero-Touch SD Card Update**: Project files can be updated on GitHub. Compiling and flashing the firmware embeds the CSV and updates the SD card copy on boot.
 
-### 2. 💵 Cash Drops Storybook
-* **Location**: [`books/cash-drops/`](./books/cash-drops/)
-* **Description**: A fun story/comic showcasing drawings and page animations.
-
-### 3. 🎨 Favorite Color Showcase
-* **Location**: [`books/favorite-color/`](./books/favorite-color/)
-* **Description**: A colorful webpage layout for a short illustrated essay.
-
-### 4. 🎮 Favorite Game Review
-* **Location**: [`books/favorite-game/`](./books/favorite-game/)
-* **Description**: An interactive webpage reviewing and highlighting a favorite game.
-
-### 5. 📚 Dog Man Comic Adaptation
-* **Location**: [`books/dogman/`](./books/dogman/)
-* **Description**: A custom book review and creative comic panels based on the Dog Man series.
-
-### 6. ⚔️ Stickman Fight Game
+#### 2. ⚔️ Stickman Fight Game
 * **Location**: [`games/stickman-fight/index.html`](./games/stickman-fight/index.html)
 * **Description**: An action-packed stickman battle game built as a webpage with ChatGPT.
 
-### 7. 🏓 Ping Pong Scorekeeper
+#### 3. 🏓 Ping Pong Scorekeeper
 * **Location**: [`games/pingpong/index.html`](./games/pingpong/index.html)
 * **Description**: An automated, offline Ping Pong scorekeeper using computer vision and audio impact detection right in the browser.
+
+### 📚 Creative Books & Stories
+
+#### 1. 💵 Cash Drops Storybook
+* **Location**: [`books/cash-drops/`](./books/cash-drops/)
+* **Description**: A fun story/comic showcasing drawings and page animations.
+
+#### 2. 🎨 Favorite Color Showcase
+* **Location**: [`books/favorite-color/`](./books/favorite-color/)
+* **Description**: A colorful webpage layout for a short illustrated essay.
+
+#### 3. 🎮 Favorite Game Review
+* **Location**: [`books/favorite-game/`](./books/favorite-game/)
+* **Description**: An interactive webpage reviewing and highlighting a favorite game.
+
+#### 4. 📚 Dog Man Comic Adaptation
+* **Location**: [`books/dogman/`](./books/dogman/)
+* **Description**: A custom book review and creative comic panels based on the Dog Man series.
 
 ## Public Publishing Checklist
 
