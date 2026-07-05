@@ -501,7 +501,7 @@ async function toggleRecording() {
     const videoStream = new MediaStream(state.stream.getVideoTracks());
     state.mediaRecorder = new MediaRecorder(
       videoStream,
-      mimeType ? { mimeType, videoBitsPerSecond: 5_000_000 } : undefined
+      mimeType ? { mimeType, videoBitsPerSecond: 2_500_000 } : undefined
     );
   } catch (error) {
     const videoStream = new MediaStream(state.stream.getVideoTracks());
@@ -839,20 +839,28 @@ function drawOverlay() {
     y: (points[3].y + points[2].y) / 2
   };
   ctx.save();
-  ctx.strokeStyle = state.calibrating ? "#c7f64d" : "#61e8d3";
-  ctx.lineWidth = Math.max(2, canvas.width / 700);
-  ctx.setLineDash([10, 8]);
-  drawTablePath(points);
-  ctx.stroke();
-  ctx.setLineDash([]);
-  ctx.beginPath();
-  ctx.moveTo(topMiddle.x, topMiddle.y);
-  ctx.lineTo(bottomMiddle.x, bottomMiddle.y);
-  ctx.strokeStyle = "#61e8d3";
-  ctx.stroke();
-
-  if (state.calibrating) {
+  if (!state.calibrating) {
+    ctx.strokeStyle = "#61e8d3";
+    ctx.lineWidth = Math.max(2, canvas.width / 700);
+    ctx.setLineDash([10, 8]);
+    drawTablePath(points);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.moveTo(topMiddle.x, topMiddle.y);
+    ctx.lineTo(bottomMiddle.x, bottomMiddle.y);
+    ctx.strokeStyle = "#61e8d3";
+    ctx.stroke();
+  } else {
     const pending = canvasTablePoints(state.calibrationPoints);
+    if (pending.length > 0) {
+      ctx.lineWidth = Math.max(2, canvas.width / 700);
+      ctx.beginPath();
+      ctx.moveTo(pending[0].x, pending[0].y);
+      for (let i = 1; i < pending.length; i++) ctx.lineTo(pending[i].x, pending[i].y);
+      ctx.strokeStyle = "#c7f64d";
+      ctx.stroke();
+    }
     pending.forEach((point, index) => {
       ctx.beginPath();
       ctx.arc(point.x, point.y, Math.max(9, canvas.width / 100), 0, Math.PI * 2);
@@ -947,6 +955,12 @@ canvas.addEventListener("pointerdown", (event) => {
     return;
   }
   state.calibrationPoints.push(point);
+  
+  if (video.readyState >= 2) {
+    drawVideoFrame();
+    drawOverlay();
+  }
+
   if (state.calibrationPoints.length < 4) {
     $("#statusPill").textContent = `Tap another table corner · ${state.calibrationPoints.length + 1}/4`;
     return;
@@ -957,6 +971,10 @@ canvas.addEventListener("pointerdown", (event) => {
     state.calibrationPoints = [];
     $("#statusPill").textContent = "Try again · Tap four separated corners";
     showToast("The selected table area is too small");
+    if (video.readyState >= 2) {
+      drawVideoFrame();
+      drawOverlay();
+    }
     return;
   }
 
@@ -972,6 +990,11 @@ canvas.addEventListener("pointerdown", (event) => {
   $("#statusPill").textContent = "Four-corner table area saved";
   state.previous = null;
   showToast("Perspective table area updated");
+
+  if (video.readyState >= 2) {
+    drawVideoFrame();
+    drawOverlay();
+  }
 });
 
 function swapSides() {
@@ -1047,7 +1070,20 @@ window.addEventListener("orientationchange", () => {
 });
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js").catch((error) => {
+    navigator.serviceWorker.register("./sw.js").then((reg) => {
+      reg.addEventListener("updatefound", () => {
+        const newWorker = reg.installing;
+        newWorker.addEventListener("statechange", () => {
+          if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+            const banner = $("#updateBanner");
+            if (banner) {
+              banner.classList.remove("hidden");
+              banner.addEventListener("click", () => window.location.reload());
+            }
+          }
+        });
+      });
+    }).catch((error) => {
       console.warn("Offline cache unavailable:", error);
     });
   });
