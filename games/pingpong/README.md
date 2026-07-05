@@ -4,10 +4,8 @@ A fully local ping pong scorekeeper MVP. No third-party scripts, cloud APIs, tel
 
 ## Getting Started
 
-Run `python3 server.py` on your computer, then access `<http://127.0.0.1:4173>` in your browser.
+Open the [Ping Pong Scorekeeper on GitHub Pages](https://xbwei.github.io/andy-project/games/pingpong/) in your browser.
 After opening it for the first time on your phone, you can install it as a PWA by selecting "Add to Home Screen" in Safari/Chrome.
-
-The local health check address is `<http://127.0.0.1:4173/health>`.
 
 ## Usage
 
@@ -31,7 +29,6 @@ Scoring follows the 11-point system (must win by 2 points). Serves switch every 
 - The microphone is only used for instantaneous hit detection in the browser; audio is not recorded or saved.
 - Video is only recorded when the user explicitly taps `Record Match`. The recording is held in the phone's memory and saved locally only after tapping `Save Recording`.
 - The page has no external dependencies, cloud voice recognition, network requests, upload, or sharing features.
-- The local HTTP server defaults to listening only on `127.0.0.1:4173`.
 
 ## Current Limitations
 
