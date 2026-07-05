@@ -24,11 +24,11 @@ Visit the live portal here: [https://xbwei.github.io/andy-project/](https://xbwe
 * **Key Features**: Runs fully offline on the M5Stack Core2 hardware. Features screen animations and hardware interactions.
 
 #### 3. ⚔️ Stickman Fight Game
-* **Location**: [`games/stickman-fight/index.html`](./games/stickman-fight/index.html)
+* **Location**: [`games/stickman-fight/`](./games/stickman-fight/)
 * **Description**: An action-packed stickman battle game built as a webpage with ChatGPT.
 
 #### 4. 🏓 Ping Pong Scorekeeper
-* **Location**: [`games/pingpong/index.html`](./games/pingpong/index.html)
+* **Location**: [`games/pingpong/`](./games/pingpong/)
 * **Description**: An automated, offline Ping Pong scorekeeper using computer vision and audio impact detection right in the browser.
 
 ### 📚 Creative Books & Stories
