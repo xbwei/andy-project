@@ -40,6 +40,10 @@ Visit the live portal here: [https://xbwei.github.io/andy-project/](https://xbwe
 * **Location**: [`games/stickman-fight/index.html`](./games/stickman-fight/index.html)
 * **Description**: An action-packed stickman battle game built as a webpage with ChatGPT.
 
+### 7. 🏓 Ping Pong Scorekeeper
+* **Location**: [`games/pingpong/index.html`](./games/pingpong/index.html)
+* **Description**: An automated, offline Ping Pong scorekeeper using computer vision and audio impact detection right in the browser.
+
 ## Public Publishing Checklist
 
 Before adding or promoting a new project, review [`PRIVACY.md`](./PRIVACY.md) to keep this public portfolio safe, simple, and focused on the creative work.
