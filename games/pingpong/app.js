@@ -971,6 +971,10 @@ canvas.addEventListener("pointerdown", (event) => {
     state.calibrationPoints = [];
     $("#statusPill").textContent = "Try again · Tap four separated corners";
     showToast("The selected table area is too small");
+    if (video.readyState >= 2) {
+      drawVideoFrame();
+      drawOverlay();
+    }
     return;
   }
 
@@ -986,6 +990,11 @@ canvas.addEventListener("pointerdown", (event) => {
   $("#statusPill").textContent = "Four-corner table area saved";
   state.previous = null;
   showToast("Perspective table area updated");
+
+  if (video.readyState >= 2) {
+    drawVideoFrame();
+    drawOverlay();
+  }
 });
 
 function swapSides() {
