@@ -1,46 +1,38 @@
 # Ping Pong Scorekeeper · Codex
 
-一个完全本地运行的乒乓球计分 MVP。没有第三方脚本、云端 API、遥测或上传逻辑。
+A fully local ping pong scorekeeper MVP. No third-party scripts, cloud APIs, telemetry, or upload logic.
 
-## 启动
+## Getting Started
 
-直接在电脑上运行 `python3 server.py`，然后在浏览器访问 `<http://127.0.0.1:4173>`。
-首次打开后，手机浏览器可用“添加到主屏幕”安装成 PWA。
+Run `python3 server.py` on your computer, then access `<http://127.0.0.1:4173>` in your browser.
+After opening it for the first time on your phone, you can install it as a PWA by selecting "Add to Home Screen" in Safari/Chrome.
 
-本机健康检查地址是 <http://127.0.0.1:4173/health>。
+The local health check address is `<http://127.0.0.1:4173/health>`.
 
-## 使用
+## Usage
 
-1. 横屏固定手机，尽量让整张球桌和双方落地区域可见。
-2. 点击右侧绿色的“开始比赛”，首次使用时允许摄像头和麦克风。
-3. 如虚线四边形没有贴合桌面，点击 `Set 4 Table Corners`，按任意顺序点击
-   画面中的四个桌角，系统会自动排序。四点会保存在当前手机浏览器中，机位不变时
-   不需要每次重设。
-4. 至少四次连续击球、持续 1.8 秒以上才会启动回合；停止击球约 1.5 秒后自动给出候选得分。
-5. “开始比赛”会变成“暂停比赛”；“关闭摄像头”会同时停止比赛和摄像头。
-6. 若误判，立刻点击“撤销”；也可直接点击双方的大比分区手动计分。
+1. Mount your phone horizontally, ensuring the entire table and landing areas for both players are visible.
+2. Tap the green "Start Match" button on the right. Allow camera and microphone access on first use.
+3. If the dashed quadrilateral doesn't align with the table, tap `Set 4 Table Corners`, and tap the four corners of the table on the screen in any order (the system will sort them automatically). The four points are saved in the current mobile browser, so you don't need to reset them if the camera position remains unchanged.
+4. A rally is triggered only after at least four consecutive hits spanning more than 1.8 seconds. A candidate score is automatically suggested about 1.5 seconds after hitting stops.
+5. "Start Match" will change to "Pause Match". "Close Camera" will stop both the match and the camera.
+6. In case of a misjudgment, tap "Undo" immediately, or manually score by directly tapping the large score areas for either side.
 
-`Camera: Rear / Camera: Front` 可切换前后摄像头。录像时不能切换摄像头。
+`Camera: Rear / Camera: Front` switches between front and rear cameras. Cameras cannot be switched during recording.
 
-点击 `Record Match` 开始录制摄像头和现场声音；再次点击停止。处理完成后点击
-`Save Recording` 保存到手机。录像不包含计分界面叠加层。
+Tap `Record Match` to start recording camera video and live audio; tap again to stop. Once processing is complete, tap `Save Recording` to save it to your phone. The recording does not include the scoring interface overlay.
 
-计分遵循 11 分制、领先 2 分获胜；每 2 分交换发球，10:10 后每 1 分交换发球。
+Scoring follows the 11-point system (must win by 2 points). Serves switch every 2 points, and every 1 point after a 10:10 tie.
 
-## 隐私
+## Privacy
 
-- 选择本地视频使用 `URL.createObjectURL`，不会把文件发送到服务器。
-- 摄像头帧只在页面内的 Canvas 中分析。
-- 麦克风只用于浏览器内的瞬时击球声检测，不录音、不保存。
-- 只有用户主动点击 `Record Match` 时才录制；录像保存在手机内存中，点击
-  `Save Recording` 后由手机本地保存。
-- 页面没有任何外部依赖、云端语音识别、网络请求、上传或分享功能。
-- 本地 HTTP server 默认监听 `127.0.0.1:4173`。
+- Local videos are handled using `URL.createObjectURL` and are never sent to a server.
+- Camera frames are only analyzed locally within the page's Canvas.
+- The microphone is only used for instantaneous hit detection in the browser; audio is not recorded or saved.
+- Video is only recorded when the user explicitly taps `Record Match`. The recording is held in the phone's memory and saved locally only after tapping `Save Recording`.
+- The page has no external dependencies, cloud voice recognition, network requests, upload, or sharing features.
+- The local HTTP server defaults to listening only on `127.0.0.1:4173`.
 
+## Current Limitations
 
-
-## 当前限制
-
-画面中的 `BALL?` 圆圈只表示系统当前检测到的候选球位置，不是按钮，也不代表
-已经确认得分。视觉判断属于实验性辅助；遮挡、运动模糊、灯光变化和球出界都
-可能造成误判。
+The `BALL?` circle on the screen only indicates the candidate ball position currently detected by the system. It is not a button and does not mean a score is confirmed. The visual judgment is an experimental aid; occlusions, motion blur, lighting changes, and balls going out of bounds can all cause misjudgments.
