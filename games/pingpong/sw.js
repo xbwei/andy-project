@@ -1,4 +1,4 @@
-const CACHE = "pingpong-scorekeeper-v14";
+const CACHE = "pingpong-scorekeeper-v15";
 const ASSETS = [
   "./",
   "./index.html",
@@ -8,7 +8,8 @@ const ASSETS = [
   "./icon.svg",
   "./icon-180.png",
   "./icon-192.png",
-  "./icon-512.png"
+  "./icon-512.png",
+  "./audio-processor.js"
 ];
 
 self.addEventListener("install", (event) => {

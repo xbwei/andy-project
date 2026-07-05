@@ -640,7 +640,6 @@ function loopFallback(timestamp = 0) {
     const size = desiredCanvasSize();
     if (canvas.width !== size.width || canvas.height !== size.height) resizeCanvas();
     drawVideoFrame();
-    analyzeAudio(performance.now());
     detectBall(timestamp);
     drawOverlay();
   }
