@@ -68,7 +68,11 @@ const state = {
   recordingStartedAt: 0,
   recordingTimer: null,
   recording: false,
-  wakeLock: null
+  wakeLock: null,
+  settings: {
+    micSensitivity: 1.0,
+    ballColor: "white", // or "orange"
+  }
 };
 
 analysisCanvas.width = 320;
@@ -222,25 +226,49 @@ async function setupAudio(stream) {
     return;
   }
   ensureAudioGraph(AudioContext);
+  await ensureAudioWorklet();
+  
   disconnectAudioSource();
+  if (!state.workletLoaded) {
+    state.audioEnabled = false;
+    $("#audioStatus").textContent = "Worklet Error";
+    return;
+  }
+  
   state.audioSource = state.audioContext.createMediaStreamSource(stream);
-  state.audioSource.connect(state.analyser);
+  state.impactNode = new AudioWorkletNode(state.audioContext, 'impact-processor');
+  state.impactNode.port.onmessage = (event) => {
+    if (event.data.type === 'hit') {
+      handleAudioHit(performance.now());
+    }
+  };
+  state.impactNode.port.postMessage({ type: 'set-sensitivity', value: state.settings.micSensitivity });
+  state.audioSource.connect(state.impactNode);
   await state.audioContext.resume();
   state.audioEnabled = true;
   $("#audioStatus").textContent = "Ready";
 }
 
-function ensureAudioGraph(AudioContext = window.AudioContext || window.webkitAudioContext) {
-  if (!state.audioContext) state.audioContext = new AudioContext();
-  if (!state.analyser) {
-    state.analyser = state.audioContext.createAnalyser();
-    state.analyser.fftSize = 1024;
-    state.analyser.smoothingTimeConstant = .15;
-    state.audioData = new Uint8Array(state.analyser.fftSize);
+async function ensureAudioWorklet() {
+  if (state.audioContext && !state.workletLoaded) {
+    try {
+      await state.audioContext.audioWorklet.addModule('audio-processor.js');
+      state.workletLoaded = true;
+    } catch (e) {
+      console.warn("AudioWorklet could not be loaded. Falling back to manual mode.", e);
+    }
   }
 }
 
+function ensureAudioGraph(AudioContext = window.AudioContext || window.webkitAudioContext) {
+  if (!state.audioContext) state.audioContext = new AudioContext();
+}
+
 function disconnectAudioSource() {
+  if (state.impactNode) {
+    try { state.impactNode.disconnect(); } catch (e) {}
+    state.impactNode = null;
+  }
   if (!state.audioSource) return;
   try {
     state.audioSource.disconnect();
@@ -258,12 +286,29 @@ async function setupFileAudio() {
     return;
   }
   ensureAudioGraph(AudioContext);
+  await ensureAudioWorklet();
+  
   disconnectAudioSource();
+  if (!state.workletLoaded) {
+    state.audioEnabled = false;
+    $("#audioStatus").textContent = "Worklet Error";
+    return;
+  }
+
   if (!state.mediaElementSource) {
     state.mediaElementSource = state.audioContext.createMediaElementSource(video);
   }
   state.audioSource = state.mediaElementSource;
-  state.audioSource.connect(state.analyser);
+  
+  state.impactNode = new AudioWorkletNode(state.audioContext, 'impact-processor');
+  state.impactNode.port.onmessage = (event) => {
+    if (event.data.type === 'hit') handleAudioHit(performance.now());
+  };
+  state.impactNode.port.postMessage({ type: 'set-sensitivity', value: state.settings.micSensitivity });
+  
+  state.audioSource.connect(state.impactNode);
+  state.impactNode.connect(state.audioContext.destination); // So we can hear the file
+  
   await state.audioContext.resume();
   state.audioEnabled = true;
   $("#audioStatus").textContent = "Ready";
@@ -315,12 +360,24 @@ function sourceReady(label) {
   $("#recordBtn").disabled = !state.stream;
   state.previous = null;
   resizeCanvas();
-  cancelAnimationFrame(state.animationId);
-  loop();
+  if (state.animationId) {
+    if (video.cancelVideoFrameCallback) video.cancelVideoFrameCallback(state.animationId);
+    else cancelAnimationFrame(state.animationId);
+    state.animationId = null;
+  }
+  if (video.requestVideoFrameCallback) {
+    state.animationId = video.requestVideoFrameCallback(loop);
+  } else {
+    state.animationId = requestAnimationFrame(loopFallback);
+  }
 }
 
 function stopSource() {
-  cancelAnimationFrame(state.animationId);
+  if (state.animationId) {
+    if (video.cancelVideoFrameCallback) video.cancelVideoFrameCallback(state.animationId);
+    else cancelAnimationFrame(state.animationId);
+    state.animationId = null;
+  }
   if (state.recording) stopRecording();
   releaseWakeLock();
   setMatchRunning(false);
@@ -417,12 +474,14 @@ async function toggleRecording() {
   const mimeType = supportedRecordingType();
 
   try {
+    const videoStream = new MediaStream(state.stream.getVideoTracks());
     state.mediaRecorder = new MediaRecorder(
-      state.stream,
+      videoStream,
       mimeType ? { mimeType, videoBitsPerSecond: 5_000_000 } : undefined
     );
   } catch (error) {
-    state.mediaRecorder = new MediaRecorder(state.stream);
+    const videoStream = new MediaStream(state.stream.getVideoTracks());
+    state.mediaRecorder = new MediaRecorder(videoStream);
   }
 
   state.mediaRecorder.addEventListener("dataavailable", (event) => {
@@ -565,7 +624,18 @@ function drawVideoFrame() {
   ctx.restore();
 }
 
-function loop(timestamp = 0) {
+function loop(now, metadata) {
+  if (video.readyState >= 2) {
+    const size = desiredCanvasSize();
+    if (canvas.width !== size.width || canvas.height !== size.height) resizeCanvas();
+    drawVideoFrame();
+    detectBall(performance.now());
+    drawOverlay();
+  }
+  state.animationId = video.requestVideoFrameCallback(loop);
+}
+
+function loopFallback(timestamp = 0) {
   if (video.readyState >= 2) {
     const size = desiredCanvasSize();
     if (canvas.width !== size.width || canvas.height !== size.height) resizeCanvas();
@@ -574,45 +644,21 @@ function loop(timestamp = 0) {
     detectBall(timestamp);
     drawOverlay();
   }
-  state.animationId = requestAnimationFrame(loop);
+  state.animationId = requestAnimationFrame(loopFallback);
 }
 
-function analyzeAudio(now) {
-  if (!state.matchRunning || !state.audioEnabled || !state.analyser) return;
-  state.analyser.getByteTimeDomainData(state.audioData);
-  let sum = 0;
-  let peak = 0;
-  let zeroCrossings = 0;
-  let previousSample = 0;
-  for (const sample of state.audioData) {
-    const normalized = (sample - 128) / 128;
-    sum += normalized * normalized;
-    peak = Math.max(peak, Math.abs(normalized));
-    if ((normalized >= 0) !== (previousSample >= 0)) zeroCrossings += 1;
-    previousSample = normalized;
+function handleAudioHit(now) {
+  if (!state.matchRunning || !state.audioEnabled) return;
+  state.lastHitAt = now;
+  state.hitTimes.push(now);
+  state.hitTimes = state.hitTimes.filter((time) => now - time < 2600);
+  state.hitCount += 1;
+  $("#audioStatus").textContent = `Hits: ${state.hitCount}`;
+  const rallySpan = state.hitTimes.at(-1) - state.hitTimes[0];
+  if (state.hitTimes.length >= 4 && rallySpan >= 1800) {
+    state.rallyActive = true;
+    $("#statusPill").textContent = `Rally active · ${state.hitCount} hits`;
   }
-  const rms = Math.sqrt(sum / state.audioData.length);
-  if (rms < .06) state.noiseFloor = state.noiseFloor * .97 + rms * .03;
-  const threshold = Math.max(.035, state.noiseFloor * 3.2);
-
-  const zeroCrossingRate = zeroCrossings / state.audioData.length;
-  const paddleImpact = peak > .11
-    && peak / Math.max(rms, .001) > 2.2
-    && zeroCrossingRate > .07;
-  if (rms > threshold && paddleImpact && now - state.lastHitAt > 300) {
-    state.lastHitAt = now;
-    state.hitTimes.push(now);
-    state.hitTimes = state.hitTimes.filter((time) => now - time < 2600);
-    state.hitCount += 1;
-    $("#audioStatus").textContent = `Hits: ${state.hitCount}`;
-    const rallySpan = state.hitTimes.at(-1) - state.hitTimes[0];
-    if (state.hitTimes.length >= 4 && rallySpan >= 1800) {
-      state.rallyActive = true;
-      $("#statusPill").textContent = `Rally active · ${state.hitCount} hits`;
-    }
-  }
-
-  if (state.rallyActive && now - state.lastHitAt > 1500) finishRally();
 }
 
 function detectBall(now) {
@@ -629,10 +675,32 @@ function detectBall(now) {
     for (let x = r.x + 1; x < r.x + r.w - 1; x += 2) {
       if (!pointInTable(x / analysisCanvas.width, y / analysisCanvas.height)) continue;
       const i = (y * analysisCanvas.width + x) * 4;
-      const lum = (frame.data[i] + frame.data[i + 1] + frame.data[i + 2]) / 3;
+      const r = frame.data[i];
+      const g = frame.data[i + 1];
+      const b = frame.data[i + 2];
+      const lum = (r + g + b) / 3;
       const prevLum = (state.previous.data[i] + state.previous.data[i + 1] + state.previous.data[i + 2]) / 3;
       const motion = Math.abs(lum - prevLum);
       if (lum < 135 || motion < 42) continue;
+
+      // HSL color filtering
+      let validColor = false;
+      const maxC = Math.max(r, g, b), minC = Math.min(r, g, b);
+      const s = maxC === 0 ? 0 : (maxC - minC) / maxC;
+      
+      if (state.settings.ballColor === "white") {
+        // White ball: low saturation or very bright
+        validColor = s < 0.25 || lum > 200;
+      } else {
+        // Orange ball: High saturation, hue in orange range
+        if (s > 0.35 && maxC === r) {
+          const h = 60 * ((g - b) / (maxC - minC));
+          validColor = (h > 15 && h < 45);
+        }
+      }
+      
+      if (!validColor) continue;
+
       const proximity = state.lastBall
         ? Math.max(0, 1 - Math.hypot(x - state.lastBall.x, y - state.lastBall.y) / 65)
         : .35;
@@ -651,6 +719,8 @@ function detectBall(now) {
     $("#lastSide").textContent = side === "left" ? "Camera left" : "Camera right";
     $("#confidence").textContent = `${Math.min(99, Math.round(best.score / 2.2))}%`;
   }
+
+  if (state.rallyActive && now - state.lastHitAt > 1500) finishRally();
 
   $("#rallyState").textContent = state.matchRunning
     ? (state.rallyActive ? "Rally active" : "Ready")
@@ -883,6 +953,15 @@ canvas.addEventListener("pointerdown", (event) => {
 
 function swapSides() {
   [state.names.left, state.names.right] = [state.names.right, state.names.left];
+  [state.score.left, state.score.right] = [state.score.right, state.score.left];
+  state.server = opposite(state.server);
+  state.firstServer = opposite(state.firstServer);
+  state.history.forEach((event) => {
+    event.side = opposite(event.side);
+    const oldLeft = event.before.left;
+    event.before.left = event.before.right;
+    event.before.right = oldLeft;
+  });
   renderScore();
   showToast("Player sides swapped");
 }
@@ -909,6 +988,17 @@ $("#resetBtn").addEventListener("click", reset);
 $("#clearHistory").addEventListener("click", () => {
   state.history = [];
   renderHistory();
+});
+$("#micSensitivity").addEventListener("input", (e) => {
+  const val = parseFloat(e.target.value);
+  state.settings.micSensitivity = val;
+  $("#sensValue").textContent = val.toFixed(1);
+  if (state.impactNode) {
+    state.impactNode.port.postMessage({ type: 'set-sensitivity', value: val });
+  }
+});
+$("#ballColor").addEventListener("change", (e) => {
+  state.settings.ballColor = e.target.value;
 });
 window.addEventListener("keydown", (event) => {
   if (event.target.matches("input")) return;

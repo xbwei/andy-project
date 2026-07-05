@@ -308,3 +308,8 @@ kbd { padding: 1px 5px; border: 1px solid var(--line); border-radius: 4px; backg
   .recording-link { padding: 5px 3px; font-size: 9px; }
   .hint { display: none; }
 }
+
+.settings-section { margin-top: 24px; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.1); }
+.setting-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.setting-row label { font-size: 13px; color: #a1a1aa; }
+.settings-select { background: #141414; color: #fff; border: 1px solid #333; padding: 4px 8px; border-radius: 4px; }
