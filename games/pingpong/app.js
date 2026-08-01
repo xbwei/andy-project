@@ -136,42 +136,33 @@ function reset() {
 
 function opposite(side) { return side === "left" ? "right" : "left"; }
 
-function escapeHTML(str) {
-  return String(str).replace(/[&<>'"]/g, (tag) => ({
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    "'": '&#39;',
-    '"': '&quot;'
-  }[tag]));
-}
-
-function updateHistoryUI() {
-  const list = $("#historyList");
-  if (state.history.length === 0) {
-    list.innerHTML = '<li class="empty-history">No points yet</li>';
-    return;
-  }
-  list.innerHTML = state.history.slice().reverse().map((event) => `
-    <li>
-      <span>${escapeHTML(state.names[event.side])} +1 — ${escapeHTML(event.source)}</span>
-      <time>${event.at.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</time>
-    </li>
-  `).join("");
-}
-
 function renderHistory() {
   const list = $("#history");
+  list.replaceChildren();
+
   if (!state.history.length) {
-    list.innerHTML = '<li class="empty-history">No points yet</li>';
+    const emptyItem = document.createElement("li");
+    emptyItem.className = "empty-history";
+    emptyItem.textContent = "No points yet";
+    list.append(emptyItem);
     return;
   }
-  list.innerHTML = state.history.slice().reverse().map((event) => `
-    <li>
-      <span>${escapeHTML(state.names[event.side])} +1 · ${escapeHTML(event.source)}</span>
-      <time>${event.at.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</time>
-    </li>
-  `).join("");
+
+  state.history.slice().reverse().forEach((event) => {
+    const item = document.createElement("li");
+    const summary = document.createElement("span");
+    const time = document.createElement("time");
+
+    summary.textContent = `${state.names[event.side]} +1 · ${event.source}`;
+    time.textContent = event.at.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit"
+    });
+
+    item.append(summary, time);
+    list.append(item);
+  });
 }
 
 let toastTimer;
