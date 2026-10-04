@@ -14,7 +14,7 @@ constexpr int CENTER_Y = SCREEN_H / 2;
 
 // --- Base ---
 constexpr int BASE_RADIUS = 14;
-constexpr int BASE_MAX_HP = 3;
+constexpr int BASE_DEFAULT_MAX_HP = 3;
 
 // --- Player ---
 constexpr float PLAYER_ORBIT_RADIUS = 32.0f;
@@ -118,6 +118,17 @@ struct Particle {
 };
 
 constexpr int MAX_PARTICLES = 30;
+
+// --- Difficulty levels ---
+enum class Difficulty {
+  Easy,
+  Normal,
+  Hard
+};
+
+Difficulty currentDifficulty = Difficulty::Normal;
+bool selectingDifficulty = true;
+int baseMaxHP = BASE_DEFAULT_MAX_HP;
 
 // --- Game state ---
 float playerAngle;
@@ -290,7 +301,14 @@ void spawnEnemy() {
     if (bossNum < 1) bossNum = 1;
     float speedScale = 1.0f + (bossNum - 1) * 0.10f;
 
-    float waveSpeed = ENEMY_BASE_SPEED + wave * SPEED_RAMP;
+    float diffMult = 1.0f;
+    if (currentDifficulty == Difficulty::Easy) {
+      diffMult = 0.75f;
+    } else if (currentDifficulty == Difficulty::Hard) {
+      diffMult = 1.25f;
+    }
+
+    float waveSpeed = (ENEMY_BASE_SPEED + wave * SPEED_RAMP) * diffMult;
     if (type == 3) {
       enemies[i].speed = waveSpeed * (0.35f * speedScale);
       enemies[i].hp = 20 + (bossNum - 1) * 5;
@@ -340,6 +358,13 @@ int findNearestEnemy(float fromX, float fromY) {
   return best;
 }
 
+int getKillCash(int type) {
+  if (type == 3) {
+    return (currentDifficulty == Difficulty::Easy) ? 10 : 5;
+  }
+  return (currentDifficulty == Difficulty::Easy) ? 2 : 1;
+}
+
 // ---------- Special attack ----------
 
 void fireSpecial() {
@@ -363,7 +388,7 @@ void fireSpecial() {
       spawnParticles(enemies[i].x, enemies[i].y, explosionColor, 4);
       if (enemies[i].hp <= 0) {
         enemies[i].active = false;
-        score += (enemies[i].type == 3) ? 5 : 1;
+        score += getKillCash(enemies[i].type);
         spawnParticles(enemies[i].x, enemies[i].y, explosionColor, (enemies[i].type == 3) ? 15 : 4);
       }
     }
@@ -381,27 +406,41 @@ void drawHeader() {
   canvas.setTextDatum(top_left);
 
   canvas.setTextColor(waveTextColor);
-  canvas.setCursor(4, 5);
-  canvas.printf("WAVE %d", wave);
+  canvas.setCursor(4, 6);
+  canvas.printf("W%d", wave);
 
-  canvas.setTextColor(scoreTextColor);
-  canvas.setCursor(130, 5);
-  canvas.printf("CASH $%d", score);
-
-  // HP as hearts
-  for (int i = 0; i < BASE_MAX_HP; ++i) {
-    uint16_t c = (i < baseHP) ? hpFullColor : hpEmptyColor;
-    int hx = 270 + i * 16;
-    canvas.fillCircle(hx + 3, 8, 4, c);
-    canvas.fillCircle(hx + 9, 8, 4, c);
-    canvas.fillTriangle(hx, 10, hx + 12, 10, hx + 6, 17, c);
+  const char* diffStr = "NORM";
+  uint16_t diffColor = canvas.color565(80, 180, 255);
+  if (currentDifficulty == Difficulty::Easy) {
+    diffStr = "EASY";
+    diffColor = canvas.color565(80, 240, 100);
+  } else if (currentDifficulty == Difficulty::Hard) {
+    diffStr = "HARD";
+    diffColor = canvas.color565(255, 80, 80);
   }
+  canvas.setTextColor(diffColor);
+  canvas.setCursor(50, 6);
+  canvas.printf("[%s]", diffStr);
 
-  // Special ammo dots (uses specialMax for correct count)
+  // Special ammo dots (gold dots)
   for (int i = 0; i < specialMax; ++i) {
     uint16_t c = (i < specialAmmo) ? canvas.color565(255, 200, 50)
                                     : canvas.color565(60, 60, 60);
-    canvas.fillCircle(80 + i * 12, 10, 4, c);
+    canvas.fillCircle(105 + i * 11, 10, 3, c);
+  }
+
+  canvas.setTextColor(scoreTextColor);
+  canvas.setCursor(175, 6);
+  canvas.printf("$%d", score);
+
+  // HP as hearts
+  int heartStartX = SCREEN_W - (baseMaxHP * 14) - 4;
+  for (int i = 0; i < baseMaxHP; ++i) {
+    uint16_t c = (i < baseHP) ? hpFullColor : hpEmptyColor;
+    int hx = heartStartX + i * 14;
+    canvas.fillCircle(hx + 3, 8, 3, c);
+    canvas.fillCircle(hx + 8, 8, 3, c);
+    canvas.fillTriangle(hx, 9, hx + 11, 9, hx + 5, 15, c);
   }
 }
 
@@ -507,30 +546,77 @@ void drawControlHints() {
 }
 
 void drawWaveBanner() {
-  canvas.fillRoundRect(80, 80, 160, 50, 8, canvas.color565(20, 30, 60));
-  canvas.drawRoundRect(80, 80, 160, 50, 8, waveTextColor);
+  canvas.fillRoundRect(80, 75, 160, 58, 8, canvas.color565(20, 30, 60));
+  canvas.drawRoundRect(80, 75, 160, 58, 8, waveTextColor);
   char buf[24];
   snprintf(buf, sizeof(buf), "WAVE %d", wave);
-  drawCentered(buf, CENTER_X, 100, 2, waveTextColor);
-  drawCentered("GET READY!", CENTER_X, 118, 1, WHITE);
+  drawCentered(buf, CENTER_X, 90, 2, waveTextColor);
+
+  const char* diffLabel = (currentDifficulty == Difficulty::Easy) ? "EASY MODE"
+                        : (currentDifficulty == Difficulty::Hard ? "HARD MODE" : "NORMAL MODE");
+  uint16_t diffColor = (currentDifficulty == Difficulty::Easy) ? canvas.color565(80, 240, 100)
+                     : (currentDifficulty == Difficulty::Hard ? canvas.color565(255, 80, 80) : canvas.color565(80, 180, 255));
+  drawCentered(diffLabel, CENTER_X, 107, 1, diffColor);
+  drawCentered("GET READY!", CENTER_X, 121, 1, WHITE);
 }
 
 void drawGameOver() {
   canvas.fillScreen(bgColor);
-  canvas.fillRoundRect(40, 60, 240, 120, 10, canvas.color565(30, 10, 10));
-  canvas.drawRoundRect(40, 60, 240, 120, 10, canvas.color565(255, 60, 60));
+  canvas.fillRoundRect(30, 45, 260, 145, 10, canvas.color565(30, 10, 10));
+  canvas.drawRoundRect(30, 45, 260, 145, 10, canvas.color565(255, 60, 60));
 
-  drawCentered("GAME OVER", CENTER_X, 88, 3, canvas.color565(255, 60, 60));
+  drawCentered("GAME OVER", CENTER_X, 68, 3, canvas.color565(255, 60, 60));
+
+  const char* diffStr = (currentDifficulty == Difficulty::Easy) ? "Easy Mode"
+                      : (currentDifficulty == Difficulty::Hard ? "Hard Mode" : "Normal Mode");
+  uint16_t diffC = (currentDifficulty == Difficulty::Easy) ? canvas.color565(80, 240, 100)
+                 : (currentDifficulty == Difficulty::Hard ? canvas.color565(255, 80, 80) : canvas.color565(80, 180, 255));
+  drawCentered(diffStr, CENTER_X, 94, 1, diffC);
 
   char buf[32];
   snprintf(buf, sizeof(buf), "Cash: $%d", score);
-  drawCentered(buf, CENTER_X, 120, 2, WHITE);
+  drawCentered(buf, CENTER_X, 114, 2, WHITE);
 
-  snprintf(buf, sizeof(buf), "Waves: %d", wave - 1);
-  drawCentered(buf, CENTER_X, 145, 1, canvas.color565(180, 180, 200));
+  snprintf(buf, sizeof(buf), "Waves Survived: %d", wave - 1);
+  drawCentered(buf, CENTER_X, 136, 1, canvas.color565(180, 180, 200));
 
-  drawCentered("Tap or A: Retry  C: Home", CENTER_X, 168, 1,
+  drawCentered("Tap or A: Retry  C: Home", CENTER_X, 164, 1,
                canvas.color565(150, 150, 170));
+  canvas.pushSprite(0, 0);
+}
+
+void drawDifficultyScreen() {
+  canvas.fillScreen(bgColor);
+
+  // Title
+  drawCentered("SELECT DIFFICULTY", CENTER_X, 22, 2, canvas.color565(33, 205, 224));
+
+  // Easy Card
+  const uint16_t easyBg = canvas.color565(18, 90, 45);
+  canvas.fillRoundRect(20, 44, 280, 46, 8, easyBg);
+  canvas.drawRoundRect(20, 44, 280, 46, 8, canvas.color565(80, 240, 100));
+  drawCentered("EASY", CENTER_X, 56, 2, canvas.color565(80, 240, 100));
+  drawCentered("Fast Hero, Slow Foes, 5 Lives, 2x Cash", CENTER_X, 76, 1, WHITE);
+
+  // Normal Card
+  const uint16_t normBg = canvas.color565(20, 60, 130);
+  canvas.fillRoundRect(20, 98, 280, 46, 8, normBg);
+  canvas.drawRoundRect(20, 98, 280, 46, 8, canvas.color565(80, 180, 255));
+  drawCentered("NORMAL", CENTER_X, 110, 2, canvas.color565(80, 180, 255));
+  drawCentered("Classic Speed, 3 Lives, 1x Cash", CENTER_X, 130, 1, WHITE);
+
+  // Hard Card
+  const uint16_t hardBg = canvas.color565(130, 25, 25);
+  canvas.fillRoundRect(20, 152, 280, 46, 8, hardBg);
+  canvas.drawRoundRect(20, 152, 280, 46, 8, canvas.color565(255, 80, 80));
+  drawCentered("HARD", CENTER_X, 164, 2, canvas.color565(255, 80, 80));
+  drawCentered("Fast Foes, 1 Life, High Challenge!", CENTER_X, 184, 1, WHITE);
+
+  // Footer Hint
+  canvas.setFont(&fonts::Font0);
+  canvas.setTextSize(1);
+  drawCentered("Tap card to start  |  Btn C: Home", CENTER_X, 220, 1, canvas.color565(130, 140, 170));
+
   canvas.pushSprite(0, 0);
 }
 
@@ -611,7 +697,7 @@ void updateBullets() {
           spawnParticles(enemies[e].x, enemies[e].y, explosionColor, 3);
           if (enemies[e].hp <= 0) {
             enemies[e].active = false;
-            score += (enemies[e].type == 3) ? 5 : 1;
+            score += getKillCash(enemies[e].type);
             spawnParticles(enemies[e].x, enemies[e].y, explosionColor, (enemies[e].type == 3) ? 15 : 5);
           }
         }
@@ -691,7 +777,7 @@ void applyUpgrade(UpgradeType up) {
       if (circleDodgeChance < 0) circleDodgeChance = 0;
       break;
     case UpgradeType::Heal:
-      if (baseHP < BASE_MAX_HP) ++baseHP;
+      if (baseHP < baseMaxHP) ++baseHP;
       break;
     case UpgradeType::Shield:
       shieldActive = true;
@@ -834,6 +920,51 @@ void rechargeSpecial() {
   }
 }
 
+void startSession(Difficulty diff) {
+  currentDifficulty = diff;
+  selectingDifficulty = false;
+
+  baseMaxHP = (diff == Difficulty::Easy) ? 5 : ((diff == Difficulty::Hard) ? 1 : 3);
+  baseHP    = baseMaxHP;
+
+  curPlayerSpeed = (diff == Difficulty::Easy) ? 4.5f : PLAYER_SPEED;
+
+  playerAngle    = -M_PI / 2.0f;
+  score          = 0;
+  wave           = 0;
+  specialMax     = SPECIAL_MAX;
+  specialAmmo    = SPECIAL_MAX;
+  lastSpecialRecharge = millis();
+  lastShotTime   = 0;
+  lastFrameTime  = millis();
+  damageFlashUntil = 0;
+  vibrationOffTime = 0;
+  wavePauseUntil = 0;
+  gameOverTime   = 0;
+  gameOver       = false;
+  waveCleared    = false;
+  waveDamageFree = true;
+  enemiesRemaining = 0;
+  nextSpawnTime  = 0;
+  showingUpgrades = false;
+  bossSpawned    = false;
+
+  // Reset upgradeable stats
+  curShootCooldown  = SHOOT_COOLDOWN;
+  curBulletRadius   = BULLET_RADIUS;
+  curBulletSpeed    = BULLET_SPEED;
+  shieldActive      = false;
+  circleDodgeChance = 50;
+
+  for (int i = 0; i < MAX_BULLETS;   ++i) bullets[i].active   = false;
+  for (int i = 0; i < MAX_ENEMIES;   ++i) enemies[i].active   = false;
+  for (int i = 0; i < MAX_PARTICLES; ++i) particles[i].active  = false;
+
+  randomSeed(millis());
+
+  startNextWave();
+}
+
 }  // namespace
 
 // ============================================================
@@ -864,43 +995,10 @@ void start() {
   explosionColor = canvas.color565(255, 180, 50);
   enemyBossColor = canvas.color565(200, 50, 255);
 
-  // Reset state
-  playerAngle    = -M_PI / 2.0f;
-  baseHP         = BASE_MAX_HP;
-  score          = 0;
-  wave           = 0;
-  specialMax     = SPECIAL_MAX;
-  specialAmmo    = SPECIAL_MAX;
-  lastSpecialRecharge = millis();
-  lastShotTime   = 0;
-  lastFrameTime  = millis();
-  damageFlashUntil = 0;
-  vibrationOffTime = 0;
-  wavePauseUntil = 0;
-  gameOverTime   = 0;
+  selectingDifficulty = true;
   gameOver       = false;
-  waveCleared    = false;
-  waveDamageFree = true;
-  enemiesRemaining = 0;
-  nextSpawnTime  = 0;
   showingUpgrades = false;
-  bossSpawned    = false;
-
-  // Reset upgradeable stats
-  curShootCooldown  = SHOOT_COOLDOWN;
-  curBulletRadius   = BULLET_RADIUS;
-  curBulletSpeed    = BULLET_SPEED;
-  curPlayerSpeed    = PLAYER_SPEED;
-  shieldActive      = false;
-  circleDodgeChance = 50;
-
-  for (int i = 0; i < MAX_BULLETS;   ++i) bullets[i].active   = false;
-  for (int i = 0; i < MAX_ENEMIES;   ++i) enemies[i].active   = false;
-  for (int i = 0; i < MAX_PARTICLES; ++i) particles[i].active  = false;
-
-  randomSeed(millis());
-
-  startNextWave();
+  lastFrameTime  = millis();
 }
 
 DefenseGameAction update() {
@@ -915,6 +1013,38 @@ DefenseGameAction update() {
   if (vibrationOffTime > 0 && now >= vibrationOffTime) {
     M5.Power.setVibration(0);
     vibrationOffTime = 0;
+  }
+
+  // --- Difficulty selection screen ---
+  if (selectingDifficulty) {
+    drawDifficultyScreen();
+
+    if (M5.BtnC.wasPressed()) {
+      canvas.deleteSprite();
+      return DefenseGameAction::Home;
+    }
+
+    if (M5.Touch.getCount() > 0) {
+      const auto& t = M5.Touch.getDetail();
+      if (t.wasPressed()) {
+        if (t.x >= 20 && t.x < 300) {
+          if (t.y >= 44 && t.y < 90) {
+            M5.Speaker.tone(1000, 50);
+            startSession(Difficulty::Easy);
+            return DefenseGameAction::None;
+          } else if (t.y >= 98 && t.y < 144) {
+            M5.Speaker.tone(1000, 50);
+            startSession(Difficulty::Normal);
+            return DefenseGameAction::None;
+          } else if (t.y >= 152 && t.y < 198) {
+            M5.Speaker.tone(1000, 50);
+            startSession(Difficulty::Hard);
+            return DefenseGameAction::None;
+          }
+        }
+      }
+    }
+    return DefenseGameAction::None;
   }
 
   // --- Game Over state ---
@@ -1036,7 +1166,7 @@ DefenseGameAction update() {
   if (!waveCleared && allEnemiesCleared()) {
     waveCleared = true;
     if (waveDamageFree) {
-      score += 5;
+      score += (currentDifficulty == Difficulty::Easy) ? 10 : 5;
     }
     playWaveCompleteSound();
     showingUpgrades = true;

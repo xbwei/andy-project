@@ -17,6 +17,10 @@ To support multiple standalone games, the project is structured with clean separ
 * **Button C**: Return to Home.
 
 #### Base Defense:
+* **Difficulty Selection**: Tap a card on launch to select your challenge level:
+  * **Easy**: Faster hero speed, 25% slower enemies, 5 lives, and 2x cash drops.
+  * **Normal**: Classic balanced gameplay, 3 lives, standard speed and rewards.
+  * **Hard**: 25% faster enemies and 1 life (sudden death challenge!).
 * **Touch screen**: Drag or tap to orbit the defender character around the center base.
 * **Button A**: Special screen-wide blast (3 charges, recharges over time).
 * **Button C**: Return to Home.
