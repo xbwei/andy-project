@@ -430,7 +430,7 @@ void drawHeader() {
   }
 
   canvas.setTextColor(scoreTextColor);
-  canvas.setCursor(150, 6);
+  canvas.setCursor(175, 6);
   canvas.printf("$%d", score);
 
   // HP as hearts
