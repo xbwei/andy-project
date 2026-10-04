@@ -36,7 +36,7 @@ git diff --check
 - Keep changes scoped to Andy's projects.
 - Use English for code, comments, filenames, and technical documentation.
 - **Mandatory Pull Request Workflow**: ALL future modifications must be made via a Pull Request. Do NOT commit or push directly to the `main` branch.
-- **Codex Review**: When creating a new PR or uploading new changes via PR, you MUST include `@codex-review` in the PR description or comment to request a Codex AI review. Wait for Codex to review and address any feedback before merging.
+- **Codex Review Only**: When creating a new PR or uploading new changes via PR, you MUST include `@codex-review` in the PR description or comment to request a Codex AI review. Rely ONLY on Codex for code review, NOT Gemini (since Antigravity/Gemini is the pairing assistant). Wait for Codex to review and address any feedback before merging.
 
 ## Audience and tone
 
