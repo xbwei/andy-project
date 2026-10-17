@@ -80,6 +80,7 @@ enum class UpgradeType {
 };
 
 constexpr int UPGRADE_COUNT = (int)UpgradeType::COUNT;
+constexpr int CHAR_UPGRADE_COUNT = 4;
 constexpr int UPGRADE_CHOICES = 3;
 
 const char* upgradeNames[] = {
@@ -92,7 +93,7 @@ const char* upgradeDescs[] = {
   "Restore 1 HP", "Block next hit", "+1 special ammo"
 };
 
-bool isCharUpgrade(UpgradeType t) { return (int)t < 4; }
+bool isCharUpgrade(UpgradeType t) { return (int)t < CHAR_UPGRADE_COUNT; }
 
 // --- Structs ---
 struct Bullet {
@@ -610,7 +611,7 @@ void drawDifficultyScreen() {
   canvas.fillRoundRect(20, 152, 280, 46, 8, hardBg);
   canvas.drawRoundRect(20, 152, 280, 46, 8, canvas.color565(255, 80, 80));
   drawCentered("HARD", CENTER_X, 164, 2, canvas.color565(255, 80, 80));
-  drawCentered("Fast Foes, 1 Life, High Challenge!", CENTER_X, 184, 1, WHITE);
+  drawCentered("Fast Foes, 1 Life, No Base Upgrades!", CENTER_X, 184, 1, WHITE);
 
   // Footer Hint
   canvas.setFont(&fonts::Font0);
@@ -743,11 +744,12 @@ void startNextWave() {
 
 void pickRandomUpgrades() {
   bool used[UPGRADE_COUNT] = {};
+  const int poolSize = (currentDifficulty == Difficulty::Hard) ? CHAR_UPGRADE_COUNT : UPGRADE_COUNT;
   for (int i = 0; i < UPGRADE_CHOICES; ++i) {
     int pick;
     int tries = 0;
     do {
-      pick = random(UPGRADE_COUNT);
+      pick = random(poolSize);
       ++tries;
     } while (used[pick] && tries < 50);
     used[pick] = true;
@@ -756,6 +758,7 @@ void pickRandomUpgrades() {
 }
 
 void applyUpgrade(UpgradeType up) {
+  if (currentDifficulty == Difficulty::Hard && !isCharUpgrade(up)) return;
   switch (up) {
     case UpgradeType::RapidFire:
       if (curShootCooldown > 100) curShootCooldown -= 50;
