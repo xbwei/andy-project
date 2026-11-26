@@ -15,4 +15,4 @@ hub.speaker.beep(frequency=659, duration=150)  # E5
 wait(50)
 hub.speaker.beep(frequency=784, duration=250)  # G5
 
-print("Hello from Andy's LEGO Prime!")
+print("Hello from LEGO SPIKE Prime!")
