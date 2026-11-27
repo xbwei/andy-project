@@ -13,7 +13,7 @@ LEGO SPIKE Prime robotics project powered by [Pybricks](https://pybricks.com/) a
 
 ## Files
 - `main.py`: Starter script that displays a happy face on the 5x5 LED matrix and plays a chime.
-- `car.py`: Driving car script using Pybricks `DriveBase` with motors on Port A and Port B, plus a front bumper button (`ForceSensor`) on Port C for crash detection and a 1-yard distance limit.
+- `car.py`: Driving car script using Pybricks `DriveBase` with motors on Port A and Port B, plus a front bumper button (`ForceSensor`) on Port C for crash detection and a 2-meter distance limit.
 - `index.html`: Robotics example directory.
 - [`examples/robot-car/index.html`](./examples/robot-car/index.html): Example 1, the interactive robot car simulator.
 

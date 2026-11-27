@@ -386,8 +386,8 @@ right_motor = Motor(Port.B, Direction.CLOCKWISE)
 bumper = ForceSensor(Port.C)
 car = DriveBase(left_motor, right_motor, wheel_diameter=56, axle_track=112)
 
-<span class="comment"># 1 yard = 914 mm</span>
-ONE_YARD_MM = 914
+<span class="comment"># 2 meters = 2000 mm</span>
+TARGET_DISTANCE_MM = 2000
 
 <span class="keyword">def</span> <span class="func">crash_alert</span>():
     <span class="string">"""Brakes the car, shows alert face, and plays crash sound."""</span>
@@ -399,8 +399,8 @@ ONE_YARD_MM = 914
     wait(30)
     hub.speaker.beep(frequency=130, duration=400)
 
-<span class="keyword">def</span> <span class="func">drive_until_crash_or_distance</span>(speed=200, max_distance=ONE_YARD_MM, timeout_ms=6000):
-    <span class="string">"""Drives forward up to 1 yard (914 mm) while monitoring bumper."""</span>
+<span class="keyword">def</span> <span class="func">drive_until_crash_or_distance</span>(speed=200, max_distance=TARGET_DISTANCE_MM, timeout_ms=12000):
+    <span class="string">"""Drives forward up to 2 meters (2000 mm) while monitoring bumper."""</span>
     car.reset()
     watch = StopWatch()
     car.drive(speed, 0)
@@ -416,8 +416,8 @@ ONE_YARD_MM = 914
         wait(10)
     crash_alert()
 
-<span class="comment"># Drive up to 1 yard or stop on crash!</span>
-drive_until_crash_or_distance(speed=200, max_distance=ONE_YARD_MM)</code></pre>
+<span class="comment"># Drive up to 2 meters or stop on crash!</span>
+drive_until_crash_or_distance(speed=200, max_distance=TARGET_DISTANCE_MM)</code></pre>
     </div>
   </div>
 
