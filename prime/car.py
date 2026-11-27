@@ -23,8 +23,8 @@ bumper = ForceSensor(Port.C)
 # - axle_track: distance between the two wheels (about 112 mm by default)
 car = DriveBase(left_motor, right_motor, wheel_diameter=56, axle_track=112)
 
-# 1 yard = 36 inches = 914 mm
-ONE_YARD_MM = 914
+# Target distance: 2 meters = 2000 mm
+TARGET_DISTANCE_MM = 2000
 
 
 def crash_alert():
@@ -41,21 +41,21 @@ def crash_alert():
     hub.speaker.beep(frequency=130, duration=400)
 
 
-def drive_until_crash_or_distance(speed=200, max_distance=ONE_YARD_MM, timeout_ms=6000):
-    """Drives forward up to 1 yard (914 mm) while monitoring the bumper for collisions."""
-    print("Driving forward up to 1 yard... listening for bumper crash!")
+def drive_until_crash_or_distance(speed=200, max_distance=TARGET_DISTANCE_MM, timeout_ms=12000):
+    """Drives forward up to 2 meters (2000 mm) while monitoring the bumper for collisions."""
+    print("Driving forward up to 2 meters... listening for bumper crash!")
     hub.display.icon(Icon.ARROW_UP)
     car.reset()
     watch = StopWatch()
     car.drive(speed, 0)
 
-    # Monitor the bumper continuously while moving, stopping on crash or reaching 1 yard
+    # Monitor the bumper continuously while moving, stopping on crash or reaching 2 meters
     while not bumper.pressed():
         if car.distance() >= max_distance:
-            print("Reached 1 yard! Safely braking car.")
+            print("Reached 2 meters! Safely braking car.")
             car.brake()
             hub.display.icon(Icon.HAPPY)
-            # Cheerful chime for reaching 1 yard target
+            # Cheerful chime for reaching target distance
             hub.speaker.beep(frequency=523, duration=150)
             wait(50)
             hub.speaker.beep(frequency=659, duration=150)
@@ -85,7 +85,7 @@ hub.speaker.beep(frequency=880, duration=300)
 
 print("Car is starting to drive!")
 
-# Drive forward up to 1 yard (914 mm) or until hitting an obstacle
-drive_until_crash_or_distance(speed=200, max_distance=ONE_YARD_MM)
+# Drive forward up to 2 meters (2000 mm) or until hitting an obstacle
+drive_until_crash_or_distance(speed=200, max_distance=TARGET_DISTANCE_MM)
 
 print("Program complete. Car safely stopped.")
