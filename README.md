@@ -11,7 +11,9 @@ Visit the live portal here: [https://xbwei.github.io/andy-project/](https://xbwe
 
 ## Projects Directory
 
-### 👾 Interactive Games
+### 👾 Games
+
+[Browse Games](https://xbwei.github.io/andy-project/games/)
 
 #### 1. 🀄 Hanzi Quest
 * **Location**: [`games/core2/`](./games/core2/)
@@ -31,7 +33,9 @@ Visit the live portal here: [https://xbwei.github.io/andy-project/](https://xbwe
 * **Location**: [`games/pingpong/`](./games/pingpong/)
 * **Description**: An automated, offline Ping Pong scorekeeper using computer vision and audio impact detection right in the browser.
 
-### 📚 Creative Books & Stories
+### 📚 Books
+
+[Browse Books](https://xbwei.github.io/andy-project/books/)
 
 #### 1. 💵 Cash Drops Storybook
 * **Location**: [`books/cash-drops/`](./books/cash-drops/)
@@ -48,6 +52,15 @@ Visit the live portal here: [https://xbwei.github.io/andy-project/](https://xbwe
 #### 4. 📚 Dog Man Comic Adaptation
 * **Location**: [`books/dogman/`](./books/dogman/)
 * **Description**: A custom book review and creative comic panels based on the Dog Man series.
+
+### 🤖 LEGO SPIKE Prime
+
+[Browse Robotics Examples](https://xbwei.github.io/andy-project/prime/)
+
+#### 1. 🏎️ Robot Car
+* **Location**: [`prime/examples/robot-car/`](./prime/examples/robot-car/)
+* **Description**: An interactive web simulator and Python example for a two-motor LEGO SPIKE Prime robot using Pybricks.
+* **Python source**: [`prime/car.py`](./prime/car.py). The existing [`prime/main.py`](./prime/main.py) is a starter hardware test, not a separate portfolio example.
 
 ## Public Publishing Checklist
 

@@ -2,440 +2,51 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Andy’s Work</title>
-  <!-- Import modern Outfit and Inter fonts from Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-  
-  <style>
-    :root {
-      --bg-dark: #090c15;
-      --bg-light: #141929;
-      --card-bg: rgba(255, 255, 255, 0.04);
-      --card-border: rgba(255, 255, 255, 0.08);
-      --card-hover-bg: rgba(255, 255, 255, 0.08);
-      --card-hover-border: rgba(255, 255, 255, 0.2);
-      --text-main: #f3f4f6;
-      --text-muted: #9ca3af;
-      --accent-cyan: #37ebf3;
-      --accent-purple: #a855f7;
-      --accent-pink: #ec4899;
-      --accent-green: #10b981;
-      --accent-orange: #f97316;
-      --accent-yellow: #f59e0b;
-    }
-    
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    
-    html, body {
-      min-height: 100%;
-      background: radial-gradient(circle at 50% 50%, var(--bg-light) 0%, var(--bg-dark) 100%);
-      color: var(--text-main);
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      overflow-x: hidden;
-    }
-    
-    .wrap {
-      max-width: 1080px;
-      margin: 0 auto;
-      padding: 60px 24px;
-    }
-    
-    header {
-      text-align: center;
-      margin-bottom: 50px;
-      position: relative;
-    }
-    
-    header::after {
-      content: '';
-      position: absolute;
-      top: -40px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 200px;
-      height: 200px;
-      background: radial-gradient(circle, rgba(168, 85, 247, 0.15) 0%, transparent 70%);
-      z-index: -1;
-      pointer-events: none;
-    }
-    
-    header h1 {
-      font-family: 'Outfit', sans-serif;
-      font-size: 3rem;
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      margin-bottom: 12px;
-      background: linear-gradient(135deg, #fff 30%, var(--accent-cyan) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    
-    header p {
-      font-size: 1.15rem;
-      color: var(--text-muted);
-      font-weight: 300;
-      max-width: 600px;
-      margin: 0 auto;
-    }
-
-    .category-section {
-      margin-bottom: 48px;
-    }
-
-    .category-title {
-      font-family: 'Outfit', sans-serif;
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin-bottom: 24px;
-      padding-bottom: 8px;
-      border-bottom: 2px solid rgba(255, 255, 255, 0.05);
-      background: linear-gradient(135deg, #fff 50%, var(--accent-cyan) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      display: inline-block;
-    }
-    
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 24px;
-    }
-    
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 20px;
-      padding: 28px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: radial-gradient(circle at 100% 0%, rgba(255, 255, 255, 0.05) 0%, transparent 60%);
-      opacity: 0;
-      transition: opacity 0.4s ease;
-      pointer-events: none;
-    }
-    
-    .card:hover {
-      transform: translateY(-6px);
-      background: var(--card-hover-bg);
-      border-color: var(--card-hover-border);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
-    }
-    
-    .card:hover::before {
-      opacity: 1;
-    }
-    
-    .card-top {
-      margin-bottom: 24px;
-    }
-    
-    .card-icon {
-      width: 54px;
-      height: 54px;
-      border-radius: 14px;
-      background: rgba(255, 255, 255, 0.04);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.8rem;
-      margin-bottom: 20px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      transition: transform 0.3s ease;
-    }
-    
-    .card:hover .card-icon {
-      transform: scale(1.1) rotate(4deg);
-    }
-    
-    /* Unique accent colors for card icons */
-    .card-cash .card-icon { background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.2); }
-    .card-color .card-icon { background: rgba(236, 72, 153, 0.1); border-color: rgba(236, 72, 153, 0.2); }
-    .card-game .card-icon { background: rgba(168, 85, 247, 0.1); border-color: rgba(168, 85, 247, 0.2); }
-    .card-dogman .card-icon { background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.2); }
-    .card-fight .card-icon { background: rgba(249, 115, 22, 0.1); border-color: rgba(249, 115, 22, 0.2); }
-    .card-hardware .card-icon { background: rgba(55, 235, 243, 0.1); border-color: rgba(55, 235, 243, 0.2); }
-    
-    .card-title {
-      font-family: 'Outfit', sans-serif;
-      font-size: 1.35rem;
-      font-weight: 600;
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    
-    .zh-inline {
-      font-size: 0.95rem;
-      color: var(--text-muted);
-      font-weight: 400;
-    }
-    
-    .badge {
-      font-size: 0.75rem;
-      font-weight: 600;
-      padding: 3px 10px;
-      border-radius: 999px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    
-    .badge-new {
-      background: rgba(16, 185, 129, 0.15);
-      color: var(--accent-green);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-    }
-    
-    .badge-hw {
-      background: rgba(55, 235, 243, 0.15);
-      color: var(--accent-cyan);
-      border: 1px solid rgba(55, 235, 243, 0.3);
-    }
-    
-    .card-desc {
-      font-size: 0.92rem;
-      color: var(--text-muted);
-      line-height: 1.6;
-      font-weight: 300;
-    }
-    
-    .card-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      text-decoration: none;
-      color: var(--text-main);
-      font-weight: 600;
-      font-size: 0.95rem;
-      margin-top: 24px;
-      transition: color 0.3s ease;
-      cursor: pointer;
-    }
-    
-    .card-link svg {
-      width: 16px;
-      height: 16px;
-      stroke: currentColor;
-      stroke-width: 2.5;
-      fill: none;
-      transition: transform 0.3s ease;
-    }
-    
-    .card:hover .card-link {
-      color: var(--accent-cyan);
-    }
-    
-    .card:hover .card-link svg {
-      transform: translateX(4px);
-    }
-    
-    .card-hardware .card-link {
-      color: var(--accent-cyan);
-    }
-    .card-hardware:hover {
-      box-shadow: 0 12px 30px rgba(55, 235, 243, 0.1);
-    }
-    
-    footer {
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 0.85rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
-      padding-top: 30px;
-      margin-top: 60px;
-      font-weight: 300;
-    }
-    
-    @media (max-width: 768px) {
-      .wrap { padding: 40px 16px; }
-      header h1 { font-size: 2.3rem; }
-      .grid { grid-template-columns: 1fr; }
-    }
-  </style>
+  <link rel="stylesheet" href="./site.css">
 </head>
 <body>
   <div class="wrap">
     <header>
       <h1>Andy’s Work</h1>
-      <p>Explore games, stories, and hardware coding creations</p>
+      <p>Explore games, books, and robotics projects.</p>
     </header>
-
-    <!-- 1. Interactive Games Section -->
-    <section class="category-section">
-      <h2 class="category-title">👾 Interactive Games</h2>
+    <main>
       <div class="grid">
-        <!-- M5Stack Core2: Base Defense -->
-        <div class="card card-hardware">
+        <a class="card card-game category-card" href="games/">
           <div class="card-top">
-            <div class="card-icon">🛡️</div>
-            <h2 class="card-title">
-              Base Defense
-              <span class="badge badge-hw">Core2</span>
-            </h2>
-            <p class="card-desc">An offline arcade defense game for the M5Stack Core2. Rotate your defender to protect the base, use special screen-clearing blasts, and unlock powerful upgrades between waves!</p>
+            <div class="card-icon" aria-hidden="true">🎮</div>
+            <h2 class="card-title">Games</h2>
+            <p class="card-desc">Play web games, explore offline Core2 games, and try the Ping Pong Scorekeeper.</p>
           </div>
-          <a class="card-link" href="https://github.com/xbwei/andy-project/tree/main/games/core2" target="_blank">
-            View Core2 Code
-            <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </a>
-        </div>
+          <span class="card-link">Explore Games <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+        </a>
 
-        <!-- M5Stack Core2: Hanzi Quest -->
-        <div class="card card-hardware">
+        <a class="card card-cash category-card" href="books/">
           <div class="card-top">
-            <div class="card-icon">🀄</div>
-            <h2 class="card-title">
-              Hanzi Quest
-              <span class="badge badge-hw">Core2</span>
-            </h2>
-            <p class="card-desc">An offline touchscreen learning game running on M5Stack Core2. Match Chinese voice cues with the correct card options featuring sound and vibration effects.</p>
+            <div class="card-icon" aria-hidden="true">📚</div>
+            <h2 class="card-title">Books</h2>
+            <p class="card-desc">Discover illustrated stories, comics, reviews, and creative writing.</p>
           </div>
-          <a class="card-link" href="https://github.com/xbwei/andy-project/tree/main/games/core2" target="_blank">
-            View Core2 Code
-            <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </a>
-        </div>
+          <span class="card-link">Explore Books <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+        </a>
 
-        <!-- Stickman Fight Game -->
-        <div class="card card-fight">
+        <a class="card card-hardware category-card" href="prime/">
           <div class="card-top">
-            <div class="card-icon">⚔️</div>
-            <h2 class="card-title">
-              Stickman Fight
-            </h2>
-            <p class="card-desc">A fun web-based shooter battle game created with ChatGPT. Control your stickman, shoot enemies, and purchase shop upgrades to survive the waves!</p>
+            <div class="card-icon" aria-hidden="true">🤖</div>
+            <h2 class="card-title">LEGO SPIKE Prime</h2>
+            <p class="card-desc">Explore hands-on Python robotics projects using LEGO SPIKE Prime and Pybricks.</p>
           </div>
-          <a class="card-link" href="games/stickman-fight/">
-            Play Web Game
-            <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </a>
-        </div>
-
-        <!-- Ping Pong Scorekeeper -->
-        <div class="card card-hardware">
-          <div class="card-top">
-            <div class="card-icon">🏓</div>
-            <h2 class="card-title">
-              Ping Pong
-              <span class="badge badge-new">New</span>
-            </h2>
-            <p class="card-desc">An automated Ping Pong scorekeeper using computer vision and audio impact detection. Fully offline AI tracking in the browser!</p>
-          </div>
-          <a class="card-link" href="games/pingpong/">
-            Launch App
-            <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </a>
-        </div>
-
-        <!-- LEGO SPIKE Prime: Robot Car -->
-        <div class="card card-hardware">
-          <div class="card-top">
-            <div class="card-icon">🏎️</div>
-            <h2 class="card-title">
-              LEGO Robot Car
-              <span class="badge badge-new">New</span>
-            </h2>
-            <p class="card-desc">Python robotics for the LEGO SPIKE Prime Hub using Pybricks. Control a two-motor autonomous rover over Bluetooth with stunts, sounds, and animations!</p>
-          </div>
-          <a class="card-link" href="prime/">
-            Explore Robot Car
-            <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </a>
-        </div>
+          <span class="card-link">Explore Robotics <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+        </a>
       </div>
-    </section>
-
-    <!-- 2. Creative Books & Stories Section -->
-    <section class="category-section">
-      <h2 class="category-title">📚 Creative Books & Stories</h2>
-      <div class="grid">
-        <!-- Cash Drops -->
-        <div class="card card-cash">
-          <div class="card-top">
-            <div class="card-icon">💵</div>
-            <h2 class="card-title">
-              Cash Drops
-              <span class="badge badge-new">New</span>
-            </h2>
-            <p class="card-desc">An interesting story showcasing fun animations and drawings created as part of Andy's comic series.</p>
-          </div>
-          <a class="card-link" href="books/cash-drops/">
-            Open Storybook
-            <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </a>
-        </div>
-
-        <!-- Dog Man -->
-        <div class="card card-dogman">
-          <div class="card-top">
-            <div class="card-icon">📚</div>
-            <h2 class="card-title">
-              Dog Man
-            </h2>
-            <p class="card-desc">Read Andy's creative book review and fun comics adaptation based on the famous Dog Man series.</p>
-          </div>
-          <a class="card-link" href="books/dogman/">
-            Read Comic Book
-            <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </a>
-        </div>
-
-        <!-- Andy's Favorite Color -->
-        <div class="card card-color">
-          <div class="card-top">
-            <div class="card-icon">🎨</div>
-            <h2 class="card-title">
-              Favorite Color
-            </h2>
-            <p class="card-desc">A colorful webpage exploring Andy's favorite color with graphics and responsive page designs.</p>
-          </div>
-          <a class="card-link" href="books/favorite-color/">
-            Open Webpage
-            <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </a>
-        </div>
-
-        <!-- Andy's Favorite Game -->
-        <div class="card card-game">
-          <div class="card-top">
-            <div class="card-icon">🎮</div>
-            <h2 class="card-title">
-              Favorite Game
-            </h2>
-            <p class="card-desc">Discover the games Andy loves playing and coding. Interactive design highlighting different game reviews.</p>
-          </div>
-          <a class="card-link" href="books/favorite-game/">
-            Explore Games
-            <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </a>
-        </div>
-      </div>
-    </section>
-
+    </main>
     <footer>
-      <p>© 2026 Andy’s Family · Updated with M5Stack Core2 Offline Engine</p>
+      <p>Creative projects for learning and sharing.</p>
     </footer>
   </div>
 </body>
