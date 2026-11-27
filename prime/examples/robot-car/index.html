@@ -499,14 +499,19 @@ drive_until_crash(speed=200)</code></pre>
       beep(880, 300);
       await sleep(350);
 
-      // 1. Drive forward
-      statusEl.textContent = "🚗 Driving straight forward (300 mm)...";
-      carEl.style.transform = "translateX(90px)";
+      // 1. Drive forward (constrained so it never collides with the wall during the spin)
+      const wall = document.querySelector('.wall-obstacle');
+      const carRect = carEl.getBoundingClientRect();
+      const wallRect = wall.getBoundingClientRect();
+      const safeDistance = Math.max(20, Math.min(90, (wallRect.left - carRect.right) - 25));
+
+      statusEl.textContent = "🚗 Driving straight forward...";
+      carEl.style.transform = `translateX(${safeDistance}px)`;
       await sleep(1000);
 
       // 2. Full 360 Spin!
       statusEl.textContent = "🌀 Donut spin (360° turn)!";
-      carEl.style.transform = "translateX(90px) rotate(360deg)";
+      carEl.style.transform = `translateX(${safeDistance}px) rotate(360deg)`;
       await sleep(1000);
 
       // 3. Return backward
