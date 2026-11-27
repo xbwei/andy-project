@@ -262,6 +262,7 @@
 
     .controls {
       display: flex;
+      flex-wrap: wrap;
       gap: 12px;
       margin-top: 20px;
       justify-content: center;
@@ -372,7 +373,7 @@
 <span class="keyword">from</span> pybricks.pupdevices <span class="keyword">import</span> ForceSensor, Motor
 <span class="keyword">from</span> pybricks.parameters <span class="keyword">import</span> Port, Direction, Icon
 <span class="keyword">from</span> pybricks.robotics <span class="keyword">import</span> DriveBase
-<span class="keyword">from</span> pybricks.tools <span class="keyword">import</span> wait
+<span class="keyword">from</span> pybricks.tools <span class="keyword">import</span> StopWatch, wait
 
 hub = PrimeHub()
 hub.display.icon(Icon.ARROW_UP)
@@ -395,10 +396,16 @@ car = DriveBase(left_motor, right_motor, wheel_diameter=56, axle_track=112)
     wait(30)
     hub.speaker.beep(frequency=130, duration=400)
 
-<span class="keyword">def</span> <span class="func">drive_until_crash</span>(speed=200):
-    <span class="string">"""Drives forward until front bumper hits an obstacle."""</span>
+<span class="keyword">def</span> <span class="func">drive_until_crash</span>(speed=200, max_distance=1000, timeout_ms=5000):
+    <span class="string">"""Drives forward until front bumper hits obstacle or safety limit reached."""</span>
+    car.reset()
+    watch = StopWatch()
     car.drive(speed, 0)
     <span class="keyword">while not</span> bumper.pressed():
+        <span class="keyword">if</span> car.distance() >= max_distance <span class="keyword">or</span> watch.time() >= timeout_ms:
+            car.brake()
+            hub.display.icon(Icon.HAPPY)
+            <span class="keyword">return</span>
         wait(10)
     crash_alert()
 

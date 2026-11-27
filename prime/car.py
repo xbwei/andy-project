@@ -2,7 +2,7 @@ from pybricks.hubs import PrimeHub
 from pybricks.pupdevices import ForceSensor, Motor
 from pybricks.parameters import Port, Direction, Icon
 from pybricks.robotics import DriveBase
-from pybricks.tools import wait
+from pybricks.tools import StopWatch, wait
 
 # Initialize the Hub
 hub = PrimeHub()
@@ -38,14 +38,21 @@ def crash_alert():
     hub.speaker.beep(frequency=130, duration=400)
 
 
-def drive_until_crash(speed=200):
-    """Drives forward until the front bumper hits an obstacle or wall."""
+def drive_until_crash(speed=200, max_distance=1000, timeout_ms=5000):
+    """Drives forward until the front bumper hits an obstacle or safety limit is reached."""
     print("Driving forward... listening for bumper crash!")
     hub.display.icon(Icon.ARROW_UP)
+    car.reset()
+    watch = StopWatch()
     car.drive(speed, 0)
 
-    # Monitor the bumper continuously while moving
+    # Monitor the bumper continuously while moving, guarded by max travel and timeout
     while not bumper.pressed():
+        if car.distance() >= max_distance or watch.time() >= timeout_ms:
+            print("Safety limit reached without collision. Safely braking car.")
+            car.brake()
+            hub.display.icon(Icon.HAPPY)
+            return
         wait(10)
 
     # Trigger emergency stop, alert face, and crash sound
@@ -61,7 +68,7 @@ hub.speaker.beep(frequency=880, duration=300)
 
 print("Car is starting to drive!")
 
-# Drive forward until hitting an obstacle or wall
+# Drive forward until hitting an obstacle or reaching safety limit
 drive_until_crash(speed=200)
 
 print("Program complete. Car safely stopped.")
