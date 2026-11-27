@@ -228,6 +228,28 @@
     .wheel-tr { bottom: -4px; left: 10px; }
     .wheel-bl { top: -4px; right: 10px; }
     .wheel-br { bottom: -4px; right: 10px; }
+    .bumper-wheel {
+      position: absolute;
+      right: -8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 10px;
+      height: 18px;
+      background: #0284c7;
+      border: 2px solid #38bdf8;
+      border-radius: 4px;
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
+    }
+    .wall-obstacle {
+      position: absolute;
+      right: 20px;
+      top: 24px;
+      bottom: 24px;
+      width: 14px;
+      background: repeating-linear-gradient(45deg, #ef4444, #ef4444 8px, #b91c1c 8px, #b91c1c 16px);
+      border-radius: 4px;
+      box-shadow: 0 0 12px rgba(239, 68, 68, 0.5);
+    }
 
     .status-text {
       text-align: center;
@@ -240,6 +262,7 @@
 
     .controls {
       display: flex;
+      flex-wrap: wrap;
       gap: 12px;
       margin-top: 20px;
       justify-content: center;
@@ -300,20 +323,25 @@
       <div class="card">
         <h2>🎮 Live Simulator</h2>
         <div class="arena">
+          <div class="wall-obstacle" title="Obstacle Wall"></div>
           <div id="car" class="sim-car">
             <div class="wheel wheel-tl"></div>
             <div class="wheel wheel-tr"></div>
             <div class="wheel wheel-bl"></div>
             <div class="wheel wheel-br"></div>
+            <div class="bumper-wheel" title="Front Bumper Wheel (Port C)"></div>
             🚗
           </div>
         </div>
-        <div id="status" class="status-text">Click "Run Car Program" to simulate!</div>
+        <div id="status" class="status-text">Click a button to test driving or bumper crash!</div>
 
         <div class="controls">
           <button id="runBtn" class="btn" onclick="runCarSimulation()">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-            Run Car Program
+            Run Donut Routine
+          </button>
+          <button id="crashBtn" class="btn" style="background: linear-gradient(135deg, #f87171 0%, #ef4444 100%); color: #fff;" onclick="runCrashSimulation()">
+            💥 Test Crash Sensor
           </button>
         </div>
       </div>
@@ -326,13 +354,13 @@
             <div class="hub-ports-top">
               <div class="hub-port-indicator hub-port-active" title="Left Motor">A</div>
               <div class="hub-port-indicator hub-port-active" title="Right Motor">B</div>
-              <div class="hub-port-indicator">C</div>
+              <div class="hub-port-indicator hub-port-active" title="Bumper Button (ForceSensor)">C</div>
               <div class="hub-port-indicator">D</div>
             </div>
             <div id="matrix" class="matrix-screen">
               <!-- 5x5 grid rendered via JS -->
             </div>
-            <div class="hub-button" onclick="runCarSimulation()">⏻</div>
+            <div class="hub-button" onclick="runCrashSimulation()">⏻</div>
           </div>
         </div>
       </div>
@@ -342,9 +370,10 @@
     <div class="card">
       <h2>🐍 Pybricks Python Code (car.py)</h2>
       <pre><code><span class="keyword">from</span> pybricks.hubs <span class="keyword">import</span> PrimeHub
-<span class="keyword">from</span> pybricks.pupdevices <span class="keyword">import</span> Motor
+<span class="keyword">from</span> pybricks.pupdevices <span class="keyword">import</span> ForceSensor, Motor
 <span class="keyword">from</span> pybricks.parameters <span class="keyword">import</span> Port, Direction, Icon
 <span class="keyword">from</span> pybricks.robotics <span class="keyword">import</span> DriveBase
+<span class="keyword">from</span> pybricks.tools <span class="keyword">import</span> StopWatch, wait
 
 hub = PrimeHub()
 hub.display.icon(Icon.ARROW_UP)
@@ -352,18 +381,36 @@ hub.display.icon(Icon.ARROW_UP)
 <span class="comment"># Motors on Port A (Left) and Port B (Right)</span>
 left_motor = Motor(Port.A, Direction.COUNTERCLOCKWISE)
 right_motor = Motor(Port.B, Direction.CLOCKWISE)
+
+<span class="comment"># Front bumper button (ForceSensor) on Port C</span>
+bumper = ForceSensor(Port.C)
 car = DriveBase(left_motor, right_motor, wheel_diameter=56, axle_track=112)
 
-<span class="comment"># 1. Drive straight forward 300 mm (about 1 foot)</span>
-car.straight(300)
+<span class="keyword">def</span> <span class="func">crash_alert</span>():
+    <span class="string">"""Brakes the car, shows alert face, and plays crash sound."""</span>
+    car.brake()
+    hub.display.icon(Icon.SAD)
+    hub.speaker.beep(frequency=320, duration=150)
+    wait(30)
+    hub.speaker.beep(frequency=220, duration=200)
+    wait(30)
+    hub.speaker.beep(frequency=130, duration=400)
 
-<span class="comment"># 2. Spin around 360 degrees (a full donut!)</span>
-car.turn(360)
+<span class="keyword">def</span> <span class="func">drive_until_crash</span>(speed=200, max_distance=1000, timeout_ms=5000):
+    <span class="string">"""Drives forward until front bumper hits obstacle or safety limit reached."""</span>
+    car.reset()
+    watch = StopWatch()
+    car.drive(speed, 0)
+    <span class="keyword">while not</span> bumper.pressed():
+        <span class="keyword">if</span> car.distance() >= max_distance <span class="keyword">or</span> watch.time() >= timeout_ms:
+            car.brake()
+            hub.display.icon(Icon.HAPPY)
+            <span class="keyword">return</span>
+        wait(10)
+    crash_alert()
 
-<span class="comment"># 3. Drive backward back to start</span>
-car.straight(-300)
-
-hub.display.icon(Icon.HAPPY)</code></pre>
+<span class="comment"># Drive until hitting a wall or obstacle!</span>
+drive_until_crash(speed=200)</code></pre>
     </div>
   </div>
 
@@ -375,6 +422,14 @@ hub.display.icon(Icon.HAPPY)</code></pre>
       0, 0, 0, 0, 0,
       1, 0, 0, 0, 1,
       0, 1, 1, 1, 0
+    ];
+
+    const SAD_FACE = [
+      0, 1, 0, 1, 0,
+      0, 1, 0, 1, 0,
+      0, 0, 0, 0, 0,
+      0, 1, 1, 1, 0,
+      1, 0, 0, 0, 1
     ];
 
     const ARROW_UP = [
@@ -423,6 +478,7 @@ hub.display.icon(Icon.HAPPY)</code></pre>
     const carEl = document.getElementById('car');
     const statusEl = document.getElementById('status');
     const runBtn = document.getElementById('runBtn');
+    const crashBtn = document.getElementById('crashBtn');
     let running = false;
 
     async function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
@@ -431,6 +487,7 @@ hub.display.icon(Icon.HAPPY)</code></pre>
       if (running) return;
       running = true;
       runBtn.disabled = true;
+      if (crashBtn) crashBtn.disabled = true;
 
       // Countdown
       statusEl.textContent = "3... 2... 1...";
@@ -442,14 +499,19 @@ hub.display.icon(Icon.HAPPY)</code></pre>
       beep(880, 300);
       await sleep(350);
 
-      // 1. Drive forward
-      statusEl.textContent = "🚗 Driving straight forward (300 mm)...";
-      carEl.style.transform = "translateX(90px)";
+      // 1. Drive forward (constrained so it never collides with the wall during the spin)
+      const wall = document.querySelector('.wall-obstacle');
+      const carRect = carEl.getBoundingClientRect();
+      const wallRect = wall.getBoundingClientRect();
+      const safeDistance = Math.max(20, Math.min(90, (wallRect.left - carRect.right) - 25));
+
+      statusEl.textContent = "🚗 Driving straight forward...";
+      carEl.style.transform = `translateX(${safeDistance}px)`;
       await sleep(1000);
 
       // 2. Full 360 Spin!
       statusEl.textContent = "🌀 Donut spin (360° turn)!";
-      carEl.style.transform = "translateX(90px) rotate(360deg)";
+      carEl.style.transform = `translateX(${safeDistance}px) rotate(360deg)`;
       await sleep(1000);
 
       // 3. Return backward
@@ -470,6 +532,50 @@ hub.display.icon(Icon.HAPPY)</code></pre>
       carEl.style.transform = "translateX(0px) rotate(0deg)";
       statusEl.textContent = "Ready for the next run!";
       runBtn.disabled = false;
+      if (crashBtn) crashBtn.disabled = false;
+      running = false;
+    }
+
+    async function runCrashSimulation() {
+      if (running) return;
+      running = true;
+      runBtn.disabled = true;
+      if (crashBtn) crashBtn.disabled = true;
+
+      // Start driving
+      statusEl.textContent = "🚗 Driving forward... listening for bumper hit!";
+      setMatrix(ARROW_UP);
+      beep(440, 150);
+      await sleep(200);
+      beep(880, 250);
+      await sleep(300);
+
+      // Derive travel dynamically so the front bumper reaches the obstacle wall regardless of screen layout
+      const wall = document.querySelector('.wall-obstacle');
+      const carRect = carEl.getBoundingClientRect();
+      const wallRect = wall.getBoundingClientRect();
+      const travel = Math.max(0, wallRect.left - carRect.right + 2);
+
+      // Drive toward wall
+      carEl.style.transform = `translateX(${travel}px)`;
+      await sleep(800);
+
+      // Hit wall!
+      statusEl.textContent = "💥 CRASH! Port C bumper triggered! Car safely braked.";
+      setMatrix(SAD_FACE);
+      // Play low descending crash sound
+      beep(320, 150);
+      await sleep(180);
+      beep(220, 200);
+      await sleep(230);
+      beep(130, 400);
+
+      await sleep(2200);
+      carEl.style.transform = "translateX(0px)";
+      setMatrix(HAPPY_FACE);
+      statusEl.textContent = "Car reset! Ready for another test.";
+      runBtn.disabled = false;
+      if (crashBtn) crashBtn.disabled = false;
       running = false;
     }
   </script>
