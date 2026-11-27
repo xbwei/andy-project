@@ -23,6 +23,9 @@ bumper = ForceSensor(Port.C)
 # - axle_track: distance between the two wheels (about 112 mm by default)
 car = DriveBase(left_motor, right_motor, wheel_diameter=56, axle_track=112)
 
+# 1 yard = 36 inches = 914 mm
+ONE_YARD_MM = 914
+
 
 def crash_alert():
     """Brakes the car immediately, displays an alert face, and plays a crash sound."""
@@ -38,18 +41,29 @@ def crash_alert():
     hub.speaker.beep(frequency=130, duration=400)
 
 
-def drive_until_crash(speed=200, max_distance=1000, timeout_ms=5000):
-    """Drives forward until the front bumper hits an obstacle or safety limit is reached."""
-    print("Driving forward... listening for bumper crash!")
+def drive_until_crash_or_distance(speed=200, max_distance=ONE_YARD_MM, timeout_ms=6000):
+    """Drives forward up to 1 yard (914 mm) while monitoring the bumper for collisions."""
+    print("Driving forward up to 1 yard... listening for bumper crash!")
     hub.display.icon(Icon.ARROW_UP)
     car.reset()
     watch = StopWatch()
     car.drive(speed, 0)
 
-    # Monitor the bumper continuously while moving, guarded by max travel and timeout
+    # Monitor the bumper continuously while moving, stopping on crash or reaching 1 yard
     while not bumper.pressed():
-        if car.distance() >= max_distance or watch.time() >= timeout_ms:
-            print("Safety limit reached without collision. Safely braking car.")
+        if car.distance() >= max_distance:
+            print("Reached 1 yard! Safely braking car.")
+            car.brake()
+            hub.display.icon(Icon.HAPPY)
+            # Cheerful chime for reaching 1 yard target
+            hub.speaker.beep(frequency=523, duration=150)
+            wait(50)
+            hub.speaker.beep(frequency=659, duration=150)
+            wait(50)
+            hub.speaker.beep(frequency=784, duration=250)
+            return
+        if watch.time() >= timeout_ms:
+            print("Safety timeout reached. Safely braking car.")
             car.brake()
             hub.display.icon(Icon.HAPPY)
             return
@@ -58,6 +72,9 @@ def drive_until_crash(speed=200, max_distance=1000, timeout_ms=5000):
     # Trigger emergency stop, alert face, and crash sound
     crash_alert()
 
+
+# Alias for compatibility with previous callers
+drive_until_crash = drive_until_crash_or_distance
 
 # Play a countdown beep!
 hub.speaker.beep(frequency=440, duration=100)
@@ -68,7 +85,7 @@ hub.speaker.beep(frequency=880, duration=300)
 
 print("Car is starting to drive!")
 
-# Drive forward until hitting an obstacle or reaching safety limit
-drive_until_crash(speed=200)
+# Drive forward up to 1 yard (914 mm) or until hitting an obstacle
+drive_until_crash_or_distance(speed=200, max_distance=ONE_YARD_MM)
 
 print("Program complete. Car safely stopped.")
