@@ -386,8 +386,8 @@ bumper = ForceSensor(Port.C)
 car = DriveBase(left_motor, right_motor, wheel_diameter=56, axle_track=112)
 
 <span class="keyword">def</span> <span class="func">crash_alert</span>():
-    <span class="string">"""Stops the car, shows alert face, and plays crash sound."""</span>
-    car.stop()
+    <span class="string">"""Brakes the car, shows alert face, and plays crash sound."""</span>
+    car.brake()
     hub.display.icon(Icon.SAD)
     hub.speaker.beep(frequency=320, duration=150)
     wait(30)
@@ -471,6 +471,7 @@ drive_until_crash(speed=200)</code></pre>
     const carEl = document.getElementById('car');
     const statusEl = document.getElementById('status');
     const runBtn = document.getElementById('runBtn');
+    const crashBtn = document.getElementById('crashBtn');
     let running = false;
 
     async function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
@@ -479,7 +480,6 @@ drive_until_crash(speed=200)</code></pre>
       if (running) return;
       running = true;
       runBtn.disabled = true;
-      const crashBtn = document.getElementById('crashBtn');
       if (crashBtn) crashBtn.disabled = true;
 
       // Countdown
@@ -520,7 +520,6 @@ drive_until_crash(speed=200)</code></pre>
       carEl.style.transform = "translateX(0px) rotate(0deg)";
       statusEl.textContent = "Ready for the next run!";
       runBtn.disabled = false;
-      const crashBtn = document.getElementById('crashBtn');
       if (crashBtn) crashBtn.disabled = false;
       running = false;
     }
@@ -529,7 +528,6 @@ drive_until_crash(speed=200)</code></pre>
       if (running) return;
       running = true;
       runBtn.disabled = true;
-      const crashBtn = document.getElementById('crashBtn');
       if (crashBtn) crashBtn.disabled = true;
 
       // Start driving
@@ -540,12 +538,18 @@ drive_until_crash(speed=200)</code></pre>
       beep(880, 250);
       await sleep(300);
 
+      // Derive travel dynamically so the front bumper reaches the obstacle wall regardless of screen layout
+      const wall = document.querySelector('.wall-obstacle');
+      const carRect = carEl.getBoundingClientRect();
+      const wallRect = wall.getBoundingClientRect();
+      const travel = Math.max(0, wallRect.left - carRect.right + 2);
+
       // Drive toward wall
-      carEl.style.transform = "translateX(145px)";
+      carEl.style.transform = `translateX(${travel}px)`;
       await sleep(800);
 
       // Hit wall!
-      statusEl.textContent = "💥 CRASH! Port C bumper triggered! Car stopped.";
+      statusEl.textContent = "💥 CRASH! Port C bumper triggered! Car safely braked.";
       setMatrix(SAD_FACE);
       // Play low descending crash sound
       beep(320, 150);

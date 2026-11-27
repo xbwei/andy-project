@@ -25,8 +25,8 @@ car = DriveBase(left_motor, right_motor, wheel_diameter=56, axle_track=112)
 
 
 def crash_alert():
-    """Stops the car immediately, displays an alert face, and plays a crash sound."""
-    car.stop()
+    """Brakes the car immediately, displays an alert face, and plays a crash sound."""
+    car.brake()
     hub.display.icon(Icon.SAD)
     print("CRASH! Front bumper triggered on Port C.")
 
