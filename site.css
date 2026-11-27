@@ -14,13 +14,13 @@
       --accent-orange: #f97316;
       --accent-yellow: #f59e0b;
     }
-    
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
-    
+
     html, body {
       min-height: 100%;
       background: radial-gradient(circle at 50% 50%, var(--bg-light) 0%, var(--bg-dark) 100%);
@@ -28,19 +28,19 @@
       font-family: 'Inter', system-ui, -apple-system, sans-serif;
       overflow-x: hidden;
     }
-    
+
     .wrap {
       max-width: 1080px;
       margin: 0 auto;
       padding: 60px 24px;
     }
-    
+
     header {
       text-align: center;
       margin-bottom: 50px;
       position: relative;
     }
-    
+
     header::after {
       content: '';
       position: absolute;
@@ -53,7 +53,7 @@
       z-index: -1;
       pointer-events: none;
     }
-    
+
     header h1 {
       font-family: 'Outfit', sans-serif;
       font-size: 3rem;
@@ -64,7 +64,7 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-    
+
     header p {
       font-size: 1.15rem;
       color: var(--text-muted);
@@ -89,13 +89,13 @@
       -webkit-text-fill-color: transparent;
       display: inline-block;
     }
-    
+
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
       gap: 24px;
     }
-    
+
     .card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
@@ -110,7 +110,7 @@
       position: relative;
       overflow: hidden;
     }
-    
+
     .card::before {
       content: '';
       position: absolute;
@@ -123,22 +123,22 @@
       transition: opacity 0.4s ease;
       pointer-events: none;
     }
-    
+
     .card:hover {
       transform: translateY(-6px);
       background: var(--card-hover-bg);
       border-color: var(--card-hover-border);
       box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
     }
-    
+
     .card:hover::before {
       opacity: 1;
     }
-    
+
     .card-top {
       margin-bottom: 24px;
     }
-    
+
     .card-icon {
       width: 54px;
       height: 54px;
@@ -152,11 +152,11 @@
       border: 1px solid rgba(255, 255, 255, 0.05);
       transition: transform 0.3s ease;
     }
-    
+
     .card:hover .card-icon {
       transform: scale(1.1) rotate(4deg);
     }
-    
+
     /* Unique accent colors for card icons */
     .card-cash .card-icon { background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.2); }
     .card-color .card-icon { background: rgba(236, 72, 153, 0.1); border-color: rgba(236, 72, 153, 0.2); }
@@ -164,7 +164,7 @@
     .card-dogman .card-icon { background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.2); }
     .card-fight .card-icon { background: rgba(249, 115, 22, 0.1); border-color: rgba(249, 115, 22, 0.2); }
     .card-hardware .card-icon { background: rgba(55, 235, 243, 0.1); border-color: rgba(55, 235, 243, 0.2); }
-    
+
     .card-title {
       font-family: 'Outfit', sans-serif;
       font-size: 1.35rem;
@@ -174,13 +174,13 @@
       align-items: center;
       gap: 8px;
     }
-    
+
     .zh-inline {
       font-size: 0.95rem;
       color: var(--text-muted);
       font-weight: 400;
     }
-    
+
     .badge {
       font-size: 0.75rem;
       font-weight: 600;
@@ -189,26 +189,26 @@
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
-    
+
     .badge-new {
       background: rgba(16, 185, 129, 0.15);
       color: var(--accent-green);
       border: 1px solid rgba(16, 185, 129, 0.3);
     }
-    
+
     .badge-hw {
       background: rgba(55, 235, 243, 0.15);
       color: var(--accent-cyan);
       border: 1px solid rgba(55, 235, 243, 0.3);
     }
-    
+
     .card-desc {
       font-size: 0.92rem;
       color: var(--text-muted);
       line-height: 1.6;
       font-weight: 300;
     }
-    
+
     .card-link {
       display: inline-flex;
       align-items: center;
@@ -221,7 +221,7 @@
       transition: color 0.3s ease;
       cursor: pointer;
     }
-    
+
     .card-link svg {
       width: 16px;
       height: 16px;
@@ -230,22 +230,22 @@
       fill: none;
       transition: transform 0.3s ease;
     }
-    
+
     .card:hover .card-link {
       color: var(--accent-cyan);
     }
-    
+
     .card:hover .card-link svg {
       transform: translateX(4px);
     }
-    
+
     .card-hardware .card-link {
       color: var(--accent-cyan);
     }
     .card-hardware:hover {
       box-shadow: 0 12px 30px rgba(55, 235, 243, 0.1);
     }
-    
+
     footer {
       text-align: center;
       color: var(--text-muted);
@@ -255,7 +255,7 @@
       margin-top: 60px;
       font-weight: 300;
     }
-    
+
     @media (max-width: 768px) {
       .wrap { padding: 40px 16px; }
       header h1 { font-size: 2.3rem; }
