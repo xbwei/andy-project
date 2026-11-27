@@ -86,5 +86,4 @@ the completion screen, sound, and vibration.
 - Keep changes within `games/core2/` unless the repository README also needs a short
   project-list update.
 - Review generated diffs and ensure `.pio/` is not staged.
-- Follow the workflow explicitly requested by the user; do not assume a PR or
-  direct-`main` push.
+- Follow the root [AGENTS.md](../../AGENTS.md) PR and Codex review loop for all changes. Never commit or push directly to main.

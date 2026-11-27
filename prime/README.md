@@ -14,7 +14,10 @@ LEGO SPIKE Prime robotics project powered by [Pybricks](https://pybricks.com/) a
 ## Files
 - `main.py`: Starter script that displays a happy face on the 5x5 LED matrix and plays a chime.
 - `car.py`: Driving car script using Pybricks `DriveBase` with motors on Port A and Port B.
-- `index.html`: Interactive web simulator for the robot car.
+- `index.html`: Robotics example directory.
+- [`examples/robot-car/index.html`](./examples/robot-car/index.html): Example 1, the interactive robot car simulator.
+
+Open the [robotics example directory](https://xbwei.github.io/andy-project/prime/) to browse examples. The existing Python script paths and CLI commands are unchanged.
 
 ## Running with Pybricks CLI
 Once Pybricks firmware is installed on your Prime hub and the hub is powered on:
